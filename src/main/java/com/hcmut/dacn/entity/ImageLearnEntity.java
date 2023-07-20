@@ -5,15 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "image_instruction")
+@Table(name = "image_learn")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageInstructionEntity {
+public class ImageLearnEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +20,6 @@ public class ImageInstructionEntity {
     private byte[] imageData;
 
     @ManyToOne
-    @JoinColumn(name = "instruction_id",nullable = false)
-    private InstructionEntity instruction;
+    @JoinColumn(name = "learnt_recipe_id",nullable = false)
+    private LearntRecipeEntity learntRecipe;
 }

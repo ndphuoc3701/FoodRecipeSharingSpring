@@ -15,7 +15,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipeScheduleEntity {
+public class ScheduleRecipeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +28,7 @@ public class RecipeScheduleEntity {
     @JoinColumn(name = "recipe_id", nullable = false)
     private RecipeEntity recipe;
 
-    @Column(name = "schedule_time", nullable = false)
+    @Column(name = "scheduled_time", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
     private Date scheduleTime;
 

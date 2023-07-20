@@ -7,19 +7,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "material_recipe")
+@Table(name = "ingredient_recipe")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MaterialRecipeEntity {
+public class IngredientRecipeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String quantity;
 
-    private String material;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "recipe_id",nullable = false)

@@ -1,4 +1,4 @@
-package controller;
+package com.hcmut.dacn.controller;
 
 import com.hcmut.dacn.request.EvaluationRequest;
 import com.hcmut.dacn.service.EvaluationService;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("evaluations")
+@RequestMapping("api/evaluations")
 public class EvaluationController {
 
     @Autowired

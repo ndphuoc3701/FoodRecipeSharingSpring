@@ -24,8 +24,8 @@ public class RecipeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "image_url", nullable = false)
-    private String imageUrl;
+    @Column(nullable = false)
+    private byte[] image;
 
     @Column(name = "num_star", nullable = false, columnDefinition = "float8 default 0")
     private Double numStar=(double)0;
@@ -44,10 +44,10 @@ public class RecipeEntity {
     private List<InstructionEntity> instructions;
 
     @OneToMany(mappedBy = "recipe")
-    private List<MaterialRecipeEntity> materialRecipes;
+    private List<IngredientRecipeEntity> ingredientRecipes;
 
     @CreationTimestamp
-    @Column(name = "create_at",nullable = false, columnDefinition = "date default current_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
-    private Date createAt;
+    @Column(name = "created_date",nullable = false, columnDefinition = "date default current_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    private Date createdDate;
 }

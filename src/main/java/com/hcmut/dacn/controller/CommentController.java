@@ -1,4 +1,4 @@
-package controller;
+package com.hcmut.dacn.controller;
 
 
 import com.hcmut.dacn.request.CommentRequest;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("api/comments")
 public class CommentController {
     public final static String PATH="comments";
     @Autowired

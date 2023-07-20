@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserDto {
     private Long id;
-    private String name;
-    private String imageUrl;
+    private String fullName;
+    private String image;
     private Double cookLevel;
     private Double reputation;
 }

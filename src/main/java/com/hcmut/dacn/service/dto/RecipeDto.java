@@ -16,11 +16,9 @@ public class RecipeDto {
 
     private String name;
 
-    private String imageUrl;
+    private String img;
 
-    private String material;
-
-    private String instruction;
+    private boolean favorite;
 
     private Double numStar;
 
@@ -30,6 +28,12 @@ public class RecipeDto {
 
     private UserDto owner;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
-    private Date createAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    private Date createdDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    private Date learntDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    private Date scheduledDate;
 }

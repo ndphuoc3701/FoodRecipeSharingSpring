@@ -19,10 +19,12 @@ public class UserEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String fullName;
 
-    @Column(name = "image_url", nullable = false)
-    private String imageUrl;
+//    @Column(name = "image_data", nullable = false)
+    private byte[] imageData;
+    private String username;
+    private String password;
 
     @Column(name = "cook_level", nullable = false, columnDefinition = "float8 default 0")
     private Double cookLevel=(double)0;

@@ -3,8 +3,8 @@ package com.hcmut.dacn.request;
 import lombok.Data;
 
 @Data
-public class MaterialRecipeRequest {
+public class IngredientRecipeRequest {
     private String quantity;
 
-    private String material;
+    private String name;
 }

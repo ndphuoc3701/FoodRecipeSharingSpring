@@ -1,17 +1,17 @@
-package controller;
+package com.hcmut.dacn.controller;
 
+import com.hcmut.dacn.request.UserRequest;
 import com.hcmut.dacn.service.UserService;
 import com.hcmut.dacn.service.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = {"http://localhost:4200"})
 @RestController
-@RequestMapping("users")
+@RequestMapping("api/users")
 public class UserController {
     public final static String PATH="users";
     @Autowired
@@ -35,5 +35,15 @@ public class UserController {
     @GetMapping("top-cook-level")
     public List<UserDto> getTopCookLevelUser(){
         return userService.getTopCookLeveUser();
+    }
+
+    @PostMapping
+    public UserDto createUser(@RequestBody UserRequest userRequest){
+        return userService.create(userRequest);
+    }
+
+    @PostMapping("login")
+    public UserDto login(@RequestBody UserRequest userRequest){
+        return userService.login(userRequest);
     }
 }

@@ -9,9 +9,9 @@ import java.util.List;
 public class RecipeRequest {
     private String name;
 
-    private byte[] image;
+    private String encodedImage;
 
-    private List<MaterialRecipeRequest> materialRecipeRequests;
+    private List<IngredientRecipeRequest> ingredientRecipeRequests;
 
     private List<InstructionRequest> instructionRequests;
 
