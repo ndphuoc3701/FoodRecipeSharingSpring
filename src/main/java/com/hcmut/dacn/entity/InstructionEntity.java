@@ -28,7 +28,7 @@ public class InstructionEntity {
     @JoinColumn(name = "recipe_id",nullable = false)
     RecipeEntity recipe;
 
-    @OneToMany(mappedBy = "instruction")
+    @OneToMany(mappedBy = "instruction",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
     private List<ImageInstructionEntity> imageInstructions;
 
 }

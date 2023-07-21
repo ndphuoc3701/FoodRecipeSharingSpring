@@ -1,8 +1,8 @@
 package com.hcmut.dacn.service;
 
 import com.hcmut.dacn.repository.RecipeRepository;
+import com.hcmut.dacn.repository.UserRepository;
 import com.hcmut.dacn.request.ImageInstructionRequest;
-import com.hcmut.dacn.request.RecipeRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +28,9 @@ public class RecipeService {
     private RecipeRepository recipeRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private RecipeMapper recipeMapper;
     public List<RecipeDto> getAll(){
         return recipeMapper.toDtos(recipeDao.getAll());
@@ -38,35 +41,40 @@ public class RecipeService {
     public RecipeDto getByRecipeId(Long recipeId){
         return recipeMapper.toDto(recipeDao.getByRecipeId(recipeId));
     }
-    public RecipeDto create(RecipeRequest recipeRequest){
-
+    public void create(RecipeSharingDto recipeRequest){
         RecipeEntity recipe=new RecipeEntity();
-        recipe.setName(recipe.getName());
-        recipe.setImage(recipeRequest.getEncodedImage().getBytes(StandardCharsets.UTF_8));
-        recipe.setOwner(userDao.getByUserId(recipeRequest.getOwnerId()));
+        recipe.setName(recipeRequest.getName());
+        recipe.setImageData(recipeRequest.getImage().getBytes(StandardCharsets.UTF_8));
+        recipe.setOwner(userRepository.findById(recipeRequest.getOwnerId()).orElse(null));
         List<InstructionEntity> instructions=new ArrayList<>();
-        recipeRequest.getInstructionRequests().forEach(
+        recipeRequest.getInstructions().forEach(
                 instructionRequest -> {
                     InstructionEntity instruction=new InstructionEntity();
                     instruction.setRecipe(recipe);
                     instruction.setContent(instructionRequest.getContent());
                     instruction.setStepOrder(instructionRequest.getStepOrder());
                     List<ImageInstructionEntity> imageInstructions=new ArrayList<>();
-                    instructionRequest.getImageInstructionRequests().forEach(
-                            imageInstructionRequest -> {
-                                ImageInstructionEntity imageInstruction=new ImageInstructionEntity();
-                                imageInstruction.setInstruction(instruction);
-                                imageInstruction.setImageData(imageInstructionRequest.getImage().getBytes(StandardCharsets.UTF_8));
-                                imageInstructions.add(imageInstruction);
-                            }
-                    );
+                    for(int i=0;i<instructionRequest.getImages().length;i++){
+                        ImageInstructionEntity imageInstruction=new ImageInstructionEntity();
+                        imageInstruction.setInstruction(instruction);
+                        imageInstruction.setImageData(instructionRequest.getImages()[i].getBytes(StandardCharsets.UTF_8));
+                        imageInstructions.add(imageInstruction);
+                    }
+//                    instructionRequest.getImages().forEach(
+//                            imageInstructionRequest -> {
+//                                ImageInstructionEntity imageInstruction=new ImageInstructionEntity();
+//                                imageInstruction.setInstruction(instruction);
+//                                imageInstruction.setImageData(imageInstructionRequest.getImage().getBytes(StandardCharsets.UTF_8));
+//                                imageInstructions.add(imageInstruction);
+//                            }
+//                    );
                     instruction.setImageInstructions(imageInstructions);
                     instructions.add(instruction);
                 }
         );
         recipe.setInstructions(instructions);
         List<IngredientRecipeEntity> ingredientRecipes=new ArrayList<>();
-        recipeRequest.getIngredientRecipeRequests().forEach(
+        recipeRequest.getIngredients().forEach(
                 ingredientRecipeRequest -> {
                     IngredientRecipeEntity ingredientRecipe=new IngredientRecipeEntity();
                     ingredientRecipe.setRecipe(recipe);
@@ -76,7 +84,7 @@ public class RecipeService {
                 }
         );
         recipe.setIngredientRecipes(ingredientRecipes);
-        return recipeMapper.toDto(recipeRepository.save(recipe));
+        recipeRepository.save(recipe);
     }
 
     public void cr(ImageInstructionRequest imageInstructionRequest){

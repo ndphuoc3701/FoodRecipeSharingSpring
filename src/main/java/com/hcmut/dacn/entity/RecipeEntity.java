@@ -25,7 +25,7 @@ public class RecipeEntity {
     private String name;
 
     @Column(nullable = false)
-    private byte[] image;
+    private byte[] imageData;
 
     @Column(name = "num_star", nullable = false, columnDefinition = "float8 default 0")
     private Double numStar=(double)0;
@@ -40,10 +40,10 @@ public class RecipeEntity {
     @JoinColumn(name = "owner_id",nullable = false)
     private UserEntity owner;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
     private List<InstructionEntity> instructions;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
     private List<IngredientRecipeEntity> ingredientRecipes;
 
     @CreationTimestamp

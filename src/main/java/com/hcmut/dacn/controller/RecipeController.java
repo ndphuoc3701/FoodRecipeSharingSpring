@@ -1,9 +1,9 @@
 package com.hcmut.dacn.controller;
 
 import com.hcmut.dacn.request.ImageInstructionRequest;
-import com.hcmut.dacn.request.RecipeRequest;
 import com.hcmut.dacn.service.RecipeService;
 import com.hcmut.dacn.service.dto.RecipeDto;
+import com.hcmut.dacn.service.dto.RecipeSharingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -38,8 +38,8 @@ public class RecipeController {
     }
 
     @PostMapping
-    public RecipeDto create(@RequestBody RecipeRequest recipeRequest){
-        return recipeService.create(recipeRequest);
+    public void create(@RequestBody RecipeSharingDto recipeRequest){
+        recipeService.create(recipeRequest);
     }
 
     @PostMapping("lol")

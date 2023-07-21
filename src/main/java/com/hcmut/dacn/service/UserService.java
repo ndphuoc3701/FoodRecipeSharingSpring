@@ -3,6 +3,8 @@ package com.hcmut.dacn.service;
 
 import com.hcmut.dacn.entity.ImageInstructionEntity;
 import com.hcmut.dacn.entity.UserEntity;
+import com.hcmut.dacn.exception.AlreadyExistedEntityException;
+import com.hcmut.dacn.exception.NotFoundEntityException;
 import com.hcmut.dacn.repository.UserRepository;
 import com.hcmut.dacn.request.UserRequest;
 import com.hcmut.dacn.service.dao.UserDao;
@@ -39,6 +41,10 @@ public class UserService {
     }
 
     public UserDto create(UserRequest userRequest){
+        List<UserEntity> checkIfUserExited=userRepository.findByUsername(userRequest.getUsername());
+        if (!checkIfUserExited.isEmpty()){
+            throw new AlreadyExistedEntityException("User already existed");
+        }
         UserEntity user=new UserEntity();
         user.setFullName(userRequest.getFullName());
         user.setUsername(userRequest.getUsername());
@@ -48,7 +54,8 @@ public class UserService {
     }
 
     public UserDto login(UserRequest userRequest){
-        List<UserEntity> user= userRepository.findByUsername(userRequest.getUsername());
-        return userMapper.toDto(userRepository.save(user.get(0)));
+        List<UserEntity> users= userRepository.findByUsername(userRequest.getUsername());
+        if(users.isEmpty())throw new NotFoundEntityException("User not found");
+        return userMapper.toDto(users.get(0));
     }
 }

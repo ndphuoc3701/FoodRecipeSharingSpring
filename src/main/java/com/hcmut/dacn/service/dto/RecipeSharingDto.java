@@ -10,6 +10,7 @@ import java.util.List;
 public class RecipeSharingDto {
     private String name;
     private String image;
-    private List<IngredientRecipeEntity> ingredients;
-    private List<InstructionEntity> instructions;
+    private List<IngredientRecipeDto> ingredients;
+    private List<InstructionDto> instructions;
+    private Long ownerId;
 }
