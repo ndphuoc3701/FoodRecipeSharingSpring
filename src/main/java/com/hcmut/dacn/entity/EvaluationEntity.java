@@ -27,10 +27,13 @@ public class EvaluationEntity {
     private Integer numDislike=0;
 
     @Column(name = "num_star", nullable = false)
-    private Double numStart;
+    private Double numStar;
 
     @Column(name = "num_comment", nullable = false, columnDefinition = "int8 default 0")
     private Integer numComment = 0;
+
+    @Column(nullable = false)
+    private String note;
 
     @ManyToOne
     @JoinColumn(name = "recipe_id",nullable = false)

@@ -9,7 +9,9 @@ public class EvaluationRequest {
 
     private Long userId;
 
-    private Double numStart;
+    private Double numStar;
 
     private String content;
+
+    private String note;
 }

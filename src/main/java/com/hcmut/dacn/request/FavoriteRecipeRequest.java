@@ -7,5 +7,4 @@ import lombok.Data;
 public class FavoriteRecipeRequest {
     private Long userId;
     private Long recipeId;
-    String note;
 }

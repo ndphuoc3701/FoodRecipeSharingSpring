@@ -25,11 +25,4 @@ public class FavoriteRecipeEntity {
     @ManyToOne
     @JoinColumn(name = "recipe_id",nullable = false)
     private RecipeEntity recipe;
-
-    private String note;
-    public FavoriteRecipeEntity(UserEntity user, RecipeEntity recipe, String note) {
-        this.user = user;
-        this.recipe = recipe;
-        this.note = note;
-    }
 }

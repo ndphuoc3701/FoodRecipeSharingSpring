@@ -1,12 +1,13 @@
 package com.hcmut.dacn.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hcmut.dacn.service.EvaluationLearntRecipeDto;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-public class EvaluationDto {
+public class EvaluationRecipeDto {
     Long id;
 
     private String content;
@@ -15,11 +16,9 @@ public class EvaluationDto {
 
     private Integer numDislike;
 
-    private Double numStart;
+    private Double numStar;
 
     private Integer numComment;
-
-    private Long recipeId;
 
     private UserDto user;
 

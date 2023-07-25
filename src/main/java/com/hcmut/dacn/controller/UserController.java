@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
@@ -17,26 +18,30 @@ public class UserController {
     @Autowired
     UserService userService;
 
+//    @GetMapping
+//    public List<UserDto> getAll(){
+//        return userService.getAll();
+//    }
+//
+//    @GetMapping("{userId}")
+//    public UserDto getByUserId(@PathVariable("userId") Long userId){
+//        return userService.getByUserId(userId);
+//    }
+//
+//    @GetMapping("top-reputation")
+//    public List<UserDto> getTopReputationUser(){
+//        return userService.getTopReputationUser();
+//    }
+//
+//    @GetMapping("top-cook-level")
+//    public List<UserDto> getTopCookLevelUser(){
+//        return userService.getTopCookLeveUser();
+//    }
+
     @GetMapping
-    public List<UserDto> getAll(){
-        return userService.getAll();
+    public Principal retrievePrincipal(Principal principal) {
+        return principal;
     }
-
-    @GetMapping("{userId}")
-    public UserDto getByUserId(@PathVariable("userId") Long userId){
-        return userService.getByUserId(userId);
-    }
-
-    @GetMapping("top-reputation")
-    public List<UserDto> getTopReputationUser(){
-        return userService.getTopReputationUser();
-    }
-
-    @GetMapping("top-cook-level")
-    public List<UserDto> getTopCookLevelUser(){
-        return userService.getTopCookLeveUser();
-    }
-
     @PostMapping
     public UserDto createUser(@RequestBody UserRequest userRequest){
         return userService.create(userRequest);

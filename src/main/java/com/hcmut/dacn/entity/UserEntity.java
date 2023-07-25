@@ -1,11 +1,17 @@
 package com.hcmut.dacn.entity;
 
+import com.hcmut.dacn.repository.FavoriteRecipeRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+//import org.springframework.security.core.GrantedAuthority;
+//import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "Users")
@@ -31,4 +37,32 @@ public class UserEntity {
 
     @Column(nullable = false, columnDefinition = "float8 default 0")
     private Double reputation=(double)0;
+
+    @OneToMany(mappedBy = "user")
+    private List<FavoriteRecipeEntity> favoriteRecipes;
+//
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonExpired() {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonLocked() {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean isCredentialsNonExpired() {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean isEnabled() {
+//        return true;
+//    }
 }

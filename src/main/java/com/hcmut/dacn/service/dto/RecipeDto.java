@@ -16,7 +16,7 @@ public class RecipeDto {
 
     private String name;
 
-    private String img;
+    private String image;
 
     private boolean favorite;
 
@@ -25,8 +25,6 @@ public class RecipeDto {
     private Integer numEvaluation;
 
     private Integer numFavorite;
-
-    private UserDto owner;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
     private Date createdDate;
