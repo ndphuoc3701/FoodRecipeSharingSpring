@@ -1,4 +1,4 @@
-package com.hcmut.dacn.service.dto;
+package com.hcmut.dacn.dto;
 
 import lombok.Data;
 
@@ -8,5 +8,5 @@ import java.util.List;
 public class InstructionDto {
     private String content;
     private int stepOrder;
-    private String[] images;
+    private List<ImageDto> images;
 }

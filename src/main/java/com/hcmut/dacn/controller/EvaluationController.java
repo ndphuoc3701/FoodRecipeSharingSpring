@@ -1,9 +1,9 @@
 package com.hcmut.dacn.controller;
 
+import com.hcmut.dacn.dto.Pagination;
 import com.hcmut.dacn.request.EvaluationRequest;
 import com.hcmut.dacn.service.EvaluationService;
-import com.hcmut.dacn.service.dto.EvaluationRecipeDto;
-import com.hcmut.dacn.service.dto.EvaluationUserDto;
+import com.hcmut.dacn.dto.EvaluationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,17 +17,17 @@ public class EvaluationController {
     EvaluationService evaluationService;
 
     @GetMapping("recipes/{recipeId}")
-    public List<EvaluationRecipeDto> getEvaluationsByRecipeId(@PathVariable Long recipeId, @RequestParam int page){
+    public Pagination<EvaluationDto> getEvaluationsByRecipeId(@PathVariable Long recipeId, @RequestParam int page){
         return evaluationService.getEvaluationsByRecipeId(recipeId,page);
     }
 
-    @GetMapping("users/{userId}")
-    public List<EvaluationUserDto> getEvaluationsByUserId(@PathVariable Long userId, @RequestParam int page){
-        return evaluationService.getEvaluationsByUserId(userId,page);
-    }
+//    @GetMapping("users/{userId}")
+//    public List<EvaluationUserDto> getEvaluationsByUserId(@PathVariable Long userId, @RequestParam int page){
+//        return evaluationService.getEvaluationsByUserId(userId,page);
+//    }
 
     @PostMapping
-    public EvaluationRecipeDto create(@RequestBody EvaluationRequest evaluationRequest){
+    public EvaluationDto create(@RequestBody EvaluationRequest evaluationRequest){
         return evaluationService.create(evaluationRequest);
     }
 }

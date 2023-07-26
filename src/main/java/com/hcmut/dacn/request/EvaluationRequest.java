@@ -1,6 +1,9 @@
 package com.hcmut.dacn.request;
 
+import com.hcmut.dacn.dto.ImageDto;
 import lombok.Data;
+
+import java.util.List;
 
 
 @Data
@@ -14,4 +17,6 @@ public class EvaluationRequest {
     private String content;
 
     private String note;
+
+    private List<ImageDto> images;
 }

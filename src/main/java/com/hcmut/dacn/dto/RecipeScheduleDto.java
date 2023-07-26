@@ -1,4 +1,4 @@
-package com.hcmut.dacn.service.dto;
+package com.hcmut.dacn.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -17,4 +17,11 @@ public class RecipeScheduleDto {
     private Date scheduleTime;
 
     private String note;
+
+    @Data
+    public static class EvaluationLearntRecipeDto {
+        private Long id;
+        private String name;
+        private String image;
+    }
 }

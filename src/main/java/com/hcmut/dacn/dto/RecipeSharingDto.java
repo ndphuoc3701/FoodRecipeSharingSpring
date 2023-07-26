@@ -1,7 +1,5 @@
-package com.hcmut.dacn.service.dto;
+package com.hcmut.dacn.dto;
 
-import com.hcmut.dacn.entity.IngredientRecipeEntity;
-import com.hcmut.dacn.entity.InstructionEntity;
 import lombok.Data;
 
 import java.util.List;

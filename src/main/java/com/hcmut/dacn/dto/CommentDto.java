@@ -1,27 +1,22 @@
-package com.hcmut.dacn.service.dto;
+package com.hcmut.dacn.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hcmut.dacn.service.EvaluationLearntRecipeDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
-public class EvaluationRecipeDto {
-    Long id;
-
+public class CommentDto {
+    private Long id;
     private String content;
-
     private Integer numLike;
-
     private Integer numDislike;
-
-    private Double numStar;
-
-    private Integer numComment;
-
+    private Long evaluationId;
     private UserDto user;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
     private Date createAt;
 }

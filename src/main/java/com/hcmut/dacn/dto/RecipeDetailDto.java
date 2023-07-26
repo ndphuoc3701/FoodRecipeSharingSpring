@@ -1,4 +1,4 @@
-package com.hcmut.dacn.service.dto;
+package com.hcmut.dacn.dto;
 
 import lombok.Data;
 
@@ -6,4 +6,5 @@ import lombok.Data;
 public class RecipeDetailDto {
     RecipeDto recipe;
     UserDto user;
+    RecipeSharingDto recipeSharing;
 }

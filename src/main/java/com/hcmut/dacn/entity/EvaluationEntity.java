@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Evaluations")
@@ -29,11 +30,11 @@ public class EvaluationEntity {
     @Column(name = "num_star", nullable = false)
     private Double numStar;
 
-    @Column(name = "num_comment", nullable = false, columnDefinition = "int8 default 0")
-    private Integer numComment = 0;
-
     @Column(nullable = false)
     private String note;
+
+    @OneToMany(mappedBy = "evaluation",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
+    private List<ImageEntity> images;
 
     @ManyToOne
     @JoinColumn(name = "recipe_id",nullable = false)
@@ -43,8 +44,11 @@ public class EvaluationEntity {
     @JoinColumn(name = "user_id",nullable = false)
     private UserEntity user;
 
+    @OneToOne(mappedBy = "evaluation",cascade = CascadeType.ALL)
+    private LearntRecipeEntity learntRecipe;
+
     @CreationTimestamp
     @Column(name = "create_at",nullable = false, columnDefinition = "date default current_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
-    private Date createAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    private Date createdDate;
 }

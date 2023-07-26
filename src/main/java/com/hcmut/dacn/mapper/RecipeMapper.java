@@ -1,7 +1,7 @@
-package com.hcmut.dacn.service.mapper;
+package com.hcmut.dacn.mapper;
 
+import com.hcmut.dacn.dto.RecipeDto;
 import com.hcmut.dacn.entity.*;
-import com.hcmut.dacn.service.dto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -1,4 +1,4 @@
-package com.hcmut.dacn.service.dto;
+package com.hcmut.dacn.dto;
 
 import lombok.Data;
 

@@ -5,22 +5,25 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "image_instruction")
+@Table(name = "images")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageInstructionEntity {
+public class ImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private byte[] imageData;
+    private byte[] data;
 
     @ManyToOne
-    @JoinColumn(name = "instruction_id",nullable = false)
+    @JoinColumn(name = "instruction_id")
     private InstructionEntity instruction;
+
+    @ManyToOne
+    @JoinColumn(name = "evaluation_id")
+    private EvaluationEntity evaluation;
 }

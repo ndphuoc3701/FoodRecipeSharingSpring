@@ -2,13 +2,11 @@ package com.hcmut.dacn.controller;
 
 import com.hcmut.dacn.request.UserRequest;
 import com.hcmut.dacn.service.UserService;
-import com.hcmut.dacn.service.dto.UserDto;
+import com.hcmut.dacn.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
 @RestController

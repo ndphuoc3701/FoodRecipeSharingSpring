@@ -1,18 +1,19 @@
 package com.hcmut.dacn.service;
 
+import com.hcmut.dacn.dto.Pagination;
+import com.hcmut.dacn.dto.RecipeDto;
+import com.hcmut.dacn.dto.RecipeSharingDto;
+import com.hcmut.dacn.mapper.RecipeMapper;
 import com.hcmut.dacn.repository.FavoriteRecipeRepository;
 import com.hcmut.dacn.repository.LearntRecipeRepository;
 import com.hcmut.dacn.repository.RecipeRepository;
 import com.hcmut.dacn.repository.UserRepository;
-import com.hcmut.dacn.request.FavoriteRecipeRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.hcmut.dacn.entity.*;
-import com.hcmut.dacn.service.dto.*;
-import com.hcmut.dacn.service.mapper.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -65,14 +66,20 @@ public class RecipeService {
                     instruction.setRecipe(recipe);
                     instruction.setContent(instructionRequest.getContent());
                     instruction.setStepOrder(instructionRequest.getStepOrder());
-                    List<ImageInstructionEntity> imageInstructions=new ArrayList<>();
-                    for(int i=0;i<instructionRequest.getImages().length;i++){
-                        ImageInstructionEntity imageInstruction=new ImageInstructionEntity();
-                        imageInstruction.setInstruction(instruction);
-                        imageInstruction.setImageData(instructionRequest.getImages()[i].getBytes(StandardCharsets.UTF_8));
-                        imageInstructions.add(imageInstruction);
-                    }
-                    instruction.setImageInstructions(imageInstructions);
+                    List<ImageEntity> images=new ArrayList<>();
+//                    for(int i=0;i<instructionRequest.getImages().length;i++){
+//                        ImageEntity imageInstruction=new ImageEntity();
+//                        imageInstruction.setInstruction(instruction);
+//                        imageInstruction.setImageData(instructionRequest.getImages()[i].getBytes(StandardCharsets.UTF_8));
+//                        imageInstructions.add(imageInstruction);
+//                    }
+                    instructionRequest.getImages().forEach(i-> {
+                        ImageEntity image = new ImageEntity();
+                        image.setInstruction(instruction);
+                        image.setData(i.getData().getBytes(StandardCharsets.UTF_8));
+                        images.add(image);
+                    });
+                    instruction.setImages(images);
                     instructions.add(instruction);
                 }
         );

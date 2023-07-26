@@ -29,6 +29,6 @@ public class InstructionEntity {
     RecipeEntity recipe;
 
     @OneToMany(mappedBy = "instruction",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
-    private List<ImageInstructionEntity> imageInstructions;
+    private List<ImageEntity> images;
 
 }

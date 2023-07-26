@@ -29,12 +29,7 @@ public class LearntRecipeEntity {
     @JoinColumn(name = "recipe_id", nullable = false)
     private RecipeEntity recipe;
 
-    @Column(name = "learnt_time", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
-    private Date learntDate;
-
-    private String note;
-
-    @OneToMany(mappedBy = "learntRecipe")
-    private List<ImageLearnEntity> imageLearns;
+    @OneToOne
+    @JoinColumn(name = "evaluation_id")
+    private EvaluationEntity evaluation;
 }

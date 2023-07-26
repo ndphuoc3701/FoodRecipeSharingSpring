@@ -1,8 +1,8 @@
-package com.hcmut.dacn.service.mapper;
+package com.hcmut.dacn.mapper;
 
 
 import com.hcmut.dacn.entity.UserEntity;
-import com.hcmut.dacn.service.dto.UserDto;
+import com.hcmut.dacn.dto.UserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
