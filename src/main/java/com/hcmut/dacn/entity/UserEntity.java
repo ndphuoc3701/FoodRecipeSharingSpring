@@ -27,7 +27,6 @@ public class UserEntity {
     @Column(nullable = false)
     private String fullName;
 
-//    @Column(name = "image_data", nullable = false)
     private byte[] imageData;
     private String username;
     private String password;

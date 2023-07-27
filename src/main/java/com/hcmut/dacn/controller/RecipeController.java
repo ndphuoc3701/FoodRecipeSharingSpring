@@ -1,5 +1,6 @@
 package com.hcmut.dacn.controller;
 
+import com.hcmut.dacn.dto.LearntRecipeDto;
 import com.hcmut.dacn.service.RecipeService;
 import com.hcmut.dacn.dto.Pagination;
 import com.hcmut.dacn.dto.RecipeDto;
@@ -35,8 +36,8 @@ public class RecipeController {
     public Pagination<RecipeDto> getRecipesByPage(@RequestParam int page){
         return recipeService.getAll(page);
     }
-    @GetMapping("user-recipes")
-    public Pagination<RecipeDto> getRecipesByUserId(@RequestParam Long userId,@RequestParam int page){
+    @GetMapping("users/{userId}")
+    public Pagination<RecipeDto> getRecipesByUserId(@PathVariable Long userId,@RequestParam int page){
         return recipeService.getRecipesByUserId(userId,page);
     }
     @PostMapping("favorite")
@@ -48,7 +49,7 @@ public class RecipeController {
         return recipeService.getFavoriteRecipesByUserId(userId,page);
     }
     @GetMapping("learning")
-    public Pagination<RecipeDto> getLearntRecipesByUserId(@RequestParam Long userId,@RequestParam int page){
+    public Pagination<LearntRecipeDto> getLearntRecipesByUserId(@RequestParam Long userId, @RequestParam int page){
         return recipeService.getLearntRecipesByUserId(userId,page);
     }
 

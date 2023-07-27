@@ -1,8 +1,7 @@
 package com.hcmut.dacn.service;
 
-import com.hcmut.dacn.dto.Pagination;
-import com.hcmut.dacn.dto.RecipeDto;
-import com.hcmut.dacn.dto.RecipeSharingDto;
+import com.hcmut.dacn.dto.*;
+import com.hcmut.dacn.mapper.LearntRecipeMapper;
 import com.hcmut.dacn.mapper.RecipeMapper;
 import com.hcmut.dacn.repository.FavoriteRecipeRepository;
 import com.hcmut.dacn.repository.LearntRecipeRepository;
@@ -31,6 +30,8 @@ public class RecipeService {
     private LearntRecipeRepository learntRecipeRepository;
     @Autowired
     private RecipeMapper recipeMapper;
+    @Autowired
+    private LearntRecipeMapper learntRecipeMapper;
 
     public Pagination<RecipeDto> getAll(int page){
         Page<RecipeEntity> recipeEntityPage=recipeRepository.findAll(PageRequest.of(page-1,12));
@@ -121,17 +122,29 @@ public class RecipeService {
         return recipeDtoPagination;
     }
 
-    public Pagination<RecipeDto> getLearntRecipesByUserId(Long userId,int page){
+    public Pagination<LearntRecipeDto> getLearntRecipesByUserId(Long userId,int page){
         Page<LearntRecipeEntity> learntRecipePage =learntRecipeRepository.findLearntRecipesByUser_Id(userId,PageRequest.of(page-1,10));
-        List<RecipeDto> recipeDtos=new ArrayList<>();
-        learntRecipePage.getContent().forEach(
-                favoriteRecipeEntity -> {
-                    recipeDtos.add(recipeMapper.toDto(favoriteRecipeEntity.getRecipe()));
-                }
-        );
-        Pagination<RecipeDto> recipeDtoPagination=new Pagination<>();
+//        List<RecipeDto> recipeDtos=new ArrayList<>();
+//        learntRecipePage.getContent().forEach(
+//                favoriteRecipeEntity -> {
+//                    recipeDtos.add(recipeMapper.toDto(favoriteRecipeEntity.getRecipe()));
+//                }
+//        );
+        List<LearntRecipeEntity> learntRecipeEntities= learntRecipePage.getContent();
+        List<LearntRecipeDto> learntRecipeDtos=learntRecipeMapper.toDTOs(learntRecipeEntities);
+        for(int i=0;i<learntRecipeEntities.size();i++){
+            List<ImageDto> images=new ArrayList<>();
+            learntRecipeEntities.get(i).getEvaluation().getImages().forEach(im->{
+                ImageDto image=new ImageDto();
+                image.setData(new String(im.getData(),StandardCharsets.UTF_8));
+                images.add(image);
+            });
+            learntRecipeDtos.get(i).getEvaluation().setImages(images);
+        }
+
+        Pagination<LearntRecipeDto> recipeDtoPagination=new Pagination<>();
         recipeDtoPagination.setTotalPages(learntRecipePage.getTotalPages());
-        recipeDtoPagination.setObjects(recipeDtos);
+        recipeDtoPagination.setObjects(learntRecipeDtos);
         return recipeDtoPagination;
     }
 }

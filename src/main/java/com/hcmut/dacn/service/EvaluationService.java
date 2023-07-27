@@ -36,9 +36,14 @@ public class EvaluationService {
         List<EvaluationEntity> evaluations=evaluationEntityPage.getContent();
         List<EvaluationDto> evaluationDtos=evaluationMapper.toDtos(evaluations);
         for(int i=0;i<evaluations.size();i++){
-            ImageDto image=new ImageDto();
-            image
-            image.setData(evaluations.get(i).g);
+            List<ImageDto> images=new ArrayList<>();
+//            image.setData(new String(evaluations.get(i).getImages(),StandardCharsets.UTF_8)));
+            evaluations.get(i).getImages().forEach(im->{
+                ImageDto image=new ImageDto();
+                image.setData(new String(im.getData(),StandardCharsets.UTF_8));
+                images.add(image);
+            });
+            evaluationDtos.get(i).setImages(images);
         }
         Pagination<EvaluationDto> evaluationDtoPagination=new Pagination<>();
         evaluationDtoPagination.setTotalPages(evaluationEntityPage.getTotalPages());
@@ -46,11 +51,7 @@ public class EvaluationService {
         return evaluationDtoPagination;
     }
 
-//    public List<EvaluationUserDto> getEvaluationsByUserId(Long userId, int page){
-//        return evaluationMapper.toUserDtos(evaluationRepository.findEvaluationsByUser_Id(userId, PageRequest.of(page-1,10)).getContent());
-//    }
-
-//    public List<EvaluationRecipeDto> getEvaluationsByUserId(Long userId, int page){
+//    public Pagination<EvaluationDto> getEvaluationsByUserId(Long userId, int page){
 //        return evaluationMapper.toUserDtos(evaluationRepository.findEvaluationsByUser_Id(userId, PageRequest.of(page-1,10)).getContent());
 //    }
 

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = {"http://localhost:4200"})
 @RestController
 @RequestMapping("api/evaluations")
 public class EvaluationController {
@@ -22,7 +23,7 @@ public class EvaluationController {
     }
 
 //    @GetMapping("users/{userId}")
-//    public List<EvaluationUserDto> getEvaluationsByUserId(@PathVariable Long userId, @RequestParam int page){
+//    public Pagination<EvaluationDto> getEvaluationsByUserId(@PathVariable Long userId, @RequestParam int page){
 //        return evaluationService.getEvaluationsByUserId(userId,page);
 //    }
 
