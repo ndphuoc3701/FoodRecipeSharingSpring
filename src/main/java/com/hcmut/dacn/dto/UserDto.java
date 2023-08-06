@@ -12,5 +12,5 @@ public class UserDto {
     private String fullName;
     private String image;
     private Double cookLevel;
-    private Double reputation;
+    private Double evaluationLevel;
 }

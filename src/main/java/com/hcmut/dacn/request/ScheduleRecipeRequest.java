@@ -6,10 +6,10 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class RecipeScheduleRequest {
+public class ScheduleRecipeRequest {
     private Long userId;
     private Long recipeId;
     String note;
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm",timezone = "Asia/Ho_Chi_Minh")
     private Date scheduleTime;
 }

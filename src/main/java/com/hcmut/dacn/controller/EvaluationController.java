@@ -22,11 +22,6 @@ public class EvaluationController {
         return evaluationService.getEvaluationsByRecipeId(recipeId,page);
     }
 
-//    @GetMapping("users/{userId}")
-//    public Pagination<EvaluationDto> getEvaluationsByUserId(@PathVariable Long userId, @RequestParam int page){
-//        return evaluationService.getEvaluationsByUserId(userId,page);
-//    }
-
     @PostMapping
     public EvaluationDto create(@RequestBody EvaluationRequest evaluationRequest){
         return evaluationService.create(evaluationRequest);

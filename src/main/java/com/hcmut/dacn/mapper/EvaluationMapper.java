@@ -1,6 +1,7 @@
 package com.hcmut.dacn.mapper;
 
 import com.hcmut.dacn.dto.EvaluationDto;
+import com.hcmut.dacn.dto.ImageDto;
 import com.hcmut.dacn.entity.*;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
@@ -9,33 +10,20 @@ import org.mapstruct.Named;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring",imports = StandardCharsets.class)
-public interface EvaluationMapper {
-    @Named(value = "recipe")
-//    @Mapping(target = "user.image",expression = "java(new String(evaluation.getRecipe().getImageData(),StandardCharsets.UTF_8))")
+public abstract class EvaluationMapper {
     @Mapping(target = "user.image",expression = "java(new String(userEntity.getImageData(),StandardCharsets.UTF_8))")
-    @Mapping(target = "images",ignore = true)
-    EvaluationDto toDto(EvaluationEntity evaluation);
-    @IterableMapping(qualifiedByName = "recipe")
-    List<EvaluationDto> toDtos(List<EvaluationEntity> evaluations);
+    @Mapping(target = "images",expression = "java(toImageDtos(evaluation.getImages()))")
+    public abstract EvaluationDto toDto(EvaluationEntity evaluation);
+    public abstract List<EvaluationDto> toDtos(List<EvaluationEntity> evaluations);
 
-//    @Named(value = "user")
-//    @Mapping(target = "evaluationLearntRecipeDto",source= "evaluation.recipe")
-//    @Mapping(target = "evaluationLearntRecipeDto.image",expression = "java(new String(evaluation.getRecipe().getImageData(),StandardCharsets.UTF_8))")
-//    EvaluationUserDto toUserDto(EvaluationEntity evaluation);
-//    @IterableMapping(qualifiedByName = "user")
-//    List<EvaluationUserDto> toUserDtos(List<EvaluationEntity> evaluations);
-
-//    @Named(value = "user")
-//    @Mapping(target = "evaluationLearntRecipeDto",source= "evaluation.recipe")
-//    @Mapping(target = "evaluationLearntRecipeDto.image",expression = "java(new String(evaluation.getRecipe().getImageData(),StandardCharsets.UTF_8))")
-//    @Mapping(target = "numDislike", ignore = true)
-//    @Mapping(target = "numStar", ignore = true)
-//    @Mapping(target = "numComment", ignore = true)
-//    @Mapping(target = "user", ignore = true)
-//    EvaluationRecipeDto toUserDto(EvaluationEntity evaluation);
-//
-//    @IterableMapping(qualifiedByName = "user")
-//    List<EvaluationUserDto> toUserDtos(List<EvaluationEntity> evaluations);
+    List<ImageDto> toImageDtos(List<ImageEntity> imageEntities){
+        return imageEntities.stream().map(imageEntity -> {
+            ImageDto imageDto= new ImageDto();
+            imageDto.setData(new String(imageEntity.getData(),StandardCharsets.UTF_8));
+            return imageDto;
+        }).collect(Collectors.toList());
+    }
 }

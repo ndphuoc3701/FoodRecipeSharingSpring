@@ -31,21 +31,12 @@ public class EvaluationService {
     UserRepository userRepository;
     @Autowired
     EvaluationMapper evaluationMapper;
-    public Pagination<EvaluationDto> getEvaluationsByRecipeId(Long recipeId, int page){
-        Page<EvaluationEntity> evaluationEntityPage=evaluationRepository.findEvaluationsByRecipe_Id(recipeId,PageRequest.of(page-1,10));
-        List<EvaluationEntity> evaluations=evaluationEntityPage.getContent();
-        List<EvaluationDto> evaluationDtos=evaluationMapper.toDtos(evaluations);
-        for(int i=0;i<evaluations.size();i++){
-            List<ImageDto> images=new ArrayList<>();
-//            image.setData(new String(evaluations.get(i).getImages(),StandardCharsets.UTF_8)));
-            evaluations.get(i).getImages().forEach(im->{
-                ImageDto image=new ImageDto();
-                image.setData(new String(im.getData(),StandardCharsets.UTF_8));
-                images.add(image);
-            });
-            evaluationDtos.get(i).setImages(images);
-        }
-        Pagination<EvaluationDto> evaluationDtoPagination=new Pagination<>();
+
+    public Pagination<EvaluationDto> getEvaluationsByRecipeId(Long recipeId, int page) {
+        Page<EvaluationEntity> evaluationEntityPage = evaluationRepository.findEvaluationsByRecipe_IdOrderByCreatedDateDesc(recipeId, PageRequest.of(page - 1, 5));
+        List<EvaluationEntity> evaluations = evaluationEntityPage.getContent();
+        List<EvaluationDto> evaluationDtos = evaluationMapper.toDtos(evaluations);
+        Pagination<EvaluationDto> evaluationDtoPagination = new Pagination<>();
         evaluationDtoPagination.setTotalPages(evaluationEntityPage.getTotalPages());
         evaluationDtoPagination.setObjects(evaluationDtos);
         return evaluationDtoPagination;
@@ -55,30 +46,36 @@ public class EvaluationService {
 //        return evaluationMapper.toUserDtos(evaluationRepository.findEvaluationsByUser_Id(userId, PageRequest.of(page-1,10)).getContent());
 //    }
 
-    public EvaluationDto create(EvaluationRequest evaluationRequest){
-        UserEntity user=userRepository.findById(evaluationRequest.getUserId()).orElse(null);
-        RecipeEntity recipe=recipeRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
-        EvaluationEntity evaluation=new EvaluationEntity();
+    public EvaluationDto create(EvaluationRequest evaluationRequest) {
+        UserEntity user = userRepository.findById(evaluationRequest.getUserId()).orElse(null);
+        RecipeEntity recipe = recipeRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
+        recipe.setNumEvaluation(recipe.getNumEvaluation() + 1);
+        recipe.setNumStar((recipe.getNumStar() * (recipe.getNumEvaluation() - 1) + evaluationRequest.getNumStar()) / recipe.getNumEvaluation());
+        int numberRecipeOfOwner= evaluationRepository.numberEvaluationOfUserId(recipe.getOwner().getId());
+        recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner)+evaluationRequest.getNumStar())/(numberRecipeOfOwner+1));
+
+        EvaluationEntity evaluation = new EvaluationEntity();
         evaluation.setContent(evaluationRequest.getContent());
         evaluation.setNumStar(evaluationRequest.getNumStar());
         evaluation.setNote(evaluationRequest.getNote());
         evaluation.setUser(user);
         evaluation.setRecipe(recipe);
-        List<ImageEntity> images=new ArrayList<>();
-        evaluationRequest.getImages().forEach(i->{
-            ImageEntity image=new ImageEntity();
-            image.setEvaluation(evaluation);
-            image.setData(i.getData().getBytes(StandardCharsets.UTF_8));
-            images.add(image);
+        List<ImageEntity> images = new ArrayList<>();
+        evaluationRequest.getImages().forEach(i -> {
+                    ImageEntity image = new ImageEntity();
+                    image.setEvaluation(evaluation);
+                    image.setData(i.getData().getBytes(StandardCharsets.UTF_8));
+                    images.add(image);
                 }
         );
         evaluation.setImages(images);
 
-        LearntRecipeEntity learntRecipe=new LearntRecipeEntity();
+        LearntRecipeEntity learntRecipe = new LearntRecipeEntity();
         learntRecipe.setEvaluation(evaluation);
         learntRecipe.setUser(user);
         learntRecipe.setRecipe(recipe);
         evaluation.setLearntRecipe(learntRecipe);
+
         return evaluationMapper.toDto(evaluationRepository.save(evaluation));
     }
 }

@@ -47,4 +47,15 @@ public class UserService {
         if(users.isEmpty())throw new NotFoundEntityException("User not found");
         return userMapper.toDto(users.get(0));
     }
+
+    public void updateImage(UserDto userDto){
+        UserEntity user=userRepository.findById(userDto.getId()).orElse(null);
+        user.setImageData(userDto.getImage().getBytes(StandardCharsets.UTF_8));
+        userRepository.save(user);
+    }
+
+    public UserDto getUserInfo(Long userId){
+        UserEntity user=userRepository.findById(userId).orElse(null);
+        return userMapper.toDto(user);
+    }
 }

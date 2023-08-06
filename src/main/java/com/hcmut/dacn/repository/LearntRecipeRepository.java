@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LearntRecipeRepository extends JpaRepository<LearntRecipeEntity,Long> {
-    Page<LearntRecipeEntity> findLearntRecipesByUser_Id(Long userId, Pageable pageable);
+    Page<LearntRecipeEntity> findLearntRecipesByUser_IdOrderByEvaluation_CreatedDateDesc(Long userId, Pageable pageable);
 
 }

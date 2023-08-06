@@ -49,4 +49,14 @@ public class UserController {
     public UserDto login(@RequestBody UserRequest userRequest){
         return userService.login(userRequest);
     }
+
+    @PutMapping("update-image")
+    public void updateImage(@RequestBody UserDto userDto){
+        userService.updateImage(userDto);
+    }
+
+    @GetMapping("info/{userId}")
+    public UserDto getUserInfo(@PathVariable Long userId){
+        return userService.getUserInfo(userId);
+    }
 }

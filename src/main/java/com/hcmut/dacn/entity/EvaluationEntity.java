@@ -18,7 +18,6 @@ public class EvaluationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String content;
 
     @Column(name = "num_like", nullable = false, columnDefinition = "int8 default 0")
@@ -30,7 +29,6 @@ public class EvaluationEntity {
     @Column(name = "num_star", nullable = false)
     private Double numStar;
 
-    @Column(nullable = false)
     private String note;
 
     @OneToMany(mappedBy = "evaluation",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)

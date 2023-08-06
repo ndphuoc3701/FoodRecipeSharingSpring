@@ -26,11 +26,8 @@ public class RecipeDto {
 
     private Integer numFavorite;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd",timezone = "Asia/Ho_Chi_Minh")
     private Date createdDate;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
-    private Date learntDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
     private Date scheduledDate;

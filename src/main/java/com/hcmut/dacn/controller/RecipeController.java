@@ -1,10 +1,11 @@
 package com.hcmut.dacn.controller;
 
-import com.hcmut.dacn.dto.LearntRecipeDto;
+import com.hcmut.dacn.dto.*;
+import com.hcmut.dacn.entity.Product;
+import com.hcmut.dacn.esRepo.ProductRepository;
+import com.hcmut.dacn.esRepo.RecipeESRepository;
+import com.hcmut.dacn.request.ScheduleRecipeRequest;
 import com.hcmut.dacn.service.RecipeService;
-import com.hcmut.dacn.dto.Pagination;
-import com.hcmut.dacn.dto.RecipeDto;
-import com.hcmut.dacn.dto.RecipeSharingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,23 +15,16 @@ import org.springframework.web.bind.annotation.*;
 public class RecipeController {
     @Autowired
     private RecipeService recipeService;
+    @Autowired
+    private ProductRepository productRepository;
 
-//    @GetMapping
-//    public List<RecipeDto> getAll(){
-//        return recipeService.getAll();
-//    }
-
-//    @GetMapping("query")
-//    public List<RecipeDto> getByOwnerId(@RequestParam("ownerId") Long ownerId){
-//        return recipeService.getByOwnerId(ownerId);
-//    }
-//    @GetMapping("{recipeId}")
-//    public RecipeDto getByRecipeId(@PathVariable("recipeId") Long recipeId){
-//        return recipeService.getByRecipeId(recipeId);
-//    }
+    @GetMapping("{recipeId}")
+    public RecipeDetailDto getRecipeDetailById(@PathVariable Long recipeId){
+        return recipeService.getRecipeDetailById(recipeId);
+    }
     @PostMapping
-    public void create(@RequestBody RecipeSharingDto recipeRequest){
-        recipeService.create(recipeRequest);
+    public RecipeDto create(@RequestBody RecipeSharingDto recipeRequest){
+        return recipeService.create(recipeRequest);
     }
     @GetMapping
     public Pagination<RecipeDto> getRecipesByPage(@RequestParam int page){
@@ -52,14 +46,22 @@ public class RecipeController {
     public Pagination<LearntRecipeDto> getLearntRecipesByUserId(@RequestParam Long userId, @RequestParam int page){
         return recipeService.getLearntRecipesByUserId(userId,page);
     }
-
-    @GetMapping("cc")
-    public String getRecipesByPages(){
-        return "ol";
+    @GetMapping("scheduling")
+    public Pagination<ScheduleRecipeDto> getScheduledRecipesByUserId(@RequestParam Long userId, @RequestParam int page){
+        return recipeService.getScheduledRecipesByUserId(userId,page);
+    }
+    @PostMapping("scheduling")
+    public void scheduleRecipe(@RequestBody ScheduleRecipeRequest scheduleRecipeRequest){
+        recipeService.scheduleRecipe(scheduleRecipeRequest);
     }
 
-    @GetMapping("dd")
-    public String getRecipesByPagess(){
-        return "olc";
+    @GetMapping("post")
+    public Iterable<Product> getAll(){
+        return productRepository.findAll();
+    }
+
+    @PostMapping("post")
+    public Product create(@RequestBody Product product){
+        return productRepository.save(product);
     }
 }

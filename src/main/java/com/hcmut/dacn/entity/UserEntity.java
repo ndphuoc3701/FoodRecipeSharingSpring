@@ -34,8 +34,8 @@ public class UserEntity {
     @Column(name = "cook_level", nullable = false, columnDefinition = "float8 default 0")
     private Double cookLevel=(double)0;
 
-    @Column(nullable = false, columnDefinition = "float8 default 0")
-    private Double reputation=(double)0;
+    @Column(name = "evaluation_level", nullable = false, columnDefinition = "float8 default 0")
+    private Double evaluationLevel=(double)0;
 
     @OneToMany(mappedBy = "user")
     private List<FavoriteRecipeEntity> favoriteRecipes;

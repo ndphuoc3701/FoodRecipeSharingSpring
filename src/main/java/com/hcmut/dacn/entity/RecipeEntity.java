@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(indexName = "recipe")
 public class RecipeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
