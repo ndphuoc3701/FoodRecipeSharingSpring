@@ -1,8 +1,5 @@
 package com.hcmut.dacn.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,11 +9,11 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Document(indexName = "product")
-@Entity
-public class Product {
+@Document(indexName = "recipe")
+//@Entity
+public class RecipeES {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
 }

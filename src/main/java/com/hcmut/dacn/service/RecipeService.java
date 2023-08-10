@@ -100,9 +100,9 @@ public class RecipeService {
         );
         recipe.setIngredientRecipes(ingredientRecipes);
         RecipeEntity recipeAfterSave = recipeRepository.save(recipe);
-        Product product=new Product(recipeAfterSave.getId(),recipeAfterSave.getName());
+        RecipeES recipeES =new RecipeES(recipeAfterSave.getId(),recipeAfterSave.getName());
 //        return recipeMapper.toDto(recipeESRepository.save(recipeAfterSave));
-        productRepository.save(product);
+        recipeESRepository.save(recipeES);
         return recipeMapper.toDto(recipeAfterSave);
 
     }

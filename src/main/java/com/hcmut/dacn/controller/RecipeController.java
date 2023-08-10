@@ -1,7 +1,7 @@
 package com.hcmut.dacn.controller;
 
 import com.hcmut.dacn.dto.*;
-import com.hcmut.dacn.entity.Product;
+import com.hcmut.dacn.entity.RecipeES;
 import com.hcmut.dacn.esRepo.ProductRepository;
 import com.hcmut.dacn.esRepo.RecipeESRepository;
 import com.hcmut.dacn.request.ScheduleRecipeRequest;
@@ -16,7 +16,7 @@ public class RecipeController {
     @Autowired
     private RecipeService recipeService;
     @Autowired
-    private ProductRepository productRepository;
+    private RecipeESRepository recipeESRepository;
 
     @GetMapping("{recipeId}")
     public RecipeDetailDto getRecipeDetailById(@PathVariable Long recipeId){
@@ -56,12 +56,12 @@ public class RecipeController {
     }
 
     @GetMapping("post")
-    public Iterable<Product> getAll(){
-        return productRepository.findAll();
+    public Iterable<RecipeES> getAll(){
+        return recipeESRepository.findAll();
     }
 
-    @PostMapping("post")
-    public Product create(@RequestBody Product product){
-        return productRepository.save(product);
-    }
+//    @PostMapping("post")
+//    public RecipeES create(@RequestBody RecipeES recipeES){
+//        return productRepository.save(recipeES);
+//    }
 }
