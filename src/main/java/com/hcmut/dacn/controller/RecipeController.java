@@ -1,13 +1,13 @@
 package com.hcmut.dacn.controller;
 
 import com.hcmut.dacn.dto.*;
-import com.hcmut.dacn.entity.RecipeES;
-import com.hcmut.dacn.esRepo.ProductRepository;
 import com.hcmut.dacn.esRepo.RecipeESRepository;
 import com.hcmut.dacn.request.ScheduleRecipeRequest;
 import com.hcmut.dacn.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
 @RestController
@@ -27,8 +27,8 @@ public class RecipeController {
         return recipeService.create(recipeRequest);
     }
     @GetMapping
-    public Pagination<RecipeDto> getRecipesByPage(@RequestParam int page){
-        return recipeService.getAll(page);
+    public Pagination<RecipeDto> getRecipesByPage(@RequestParam String keyword, @RequestParam String filter, @RequestParam String ingredient, @RequestParam int page){
+        return recipeService.getAll(keyword, filter, ingredient, page);
     }
     @GetMapping("users/{userId}")
     public Pagination<RecipeDto> getRecipesByUserId(@PathVariable Long userId,@RequestParam int page){
@@ -56,12 +56,17 @@ public class RecipeController {
     }
 
     @GetMapping("post")
-    public Iterable<RecipeES> getAll(){
+    public Iterable<RecipeDto> getAll(){
         return recipeESRepository.findAll();
     }
 
-//    @PostMapping("post")
-//    public RecipeES create(@RequestBody RecipeES recipeES){
-//        return productRepository.save(recipeES);
-//    }
+    @GetMapping("es")
+    public Pagination<RecipeDto> getRecipesByKeyword(@RequestParam String keyword,@RequestParam int page){
+        return recipeService.getRecipesByKeyword(keyword,page);
+    }
+
+    @GetMapping("search")
+    public List<String> getRecipesByKeywordSearchBar(@RequestParam String keyword){
+        return recipeService.getRecipesByKeywordSearchBar(keyword);
+    }
 }

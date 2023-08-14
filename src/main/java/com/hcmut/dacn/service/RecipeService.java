@@ -11,6 +11,7 @@ import com.hcmut.dacn.request.ScheduleRecipeRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.hcmut.dacn.entity.*;
@@ -18,6 +19,7 @@ import com.hcmut.dacn.entity.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RecipeService {
@@ -42,13 +44,20 @@ public class RecipeService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Pagination<RecipeDto> getAll(int page){
-        Page<RecipeEntity> recipeEntityPage=recipeRepository.findAll(PageRequest.of(page-1,12));
+    public Pagination<RecipeDto> getAll(String keyword, String filter, String ingredient, int page){
+        List<RecipeDto> recipeDtos=null;
+        if(keyword==null&&filter==null&&ingredient==null){
+            Page<RecipeEntity> recipeEntityPage=recipeRepository.findAll(PageRequest.of(page-1,12));
+            recipeDtos=recipeMapper.toDtos(recipeEntityPage.getContent());
+        }
 //        return recipeMapper.toDtos(recipeRepository.findAll(PageRequest.of(page-1,12)).getContent());
-        List<RecipeDto> recipeDtos=recipeMapper.toDtos(recipeEntityPage.getContent());
+        Page<RecipeDto> recipeDtoPage=null;
+        if(filter!=null){
+            recipeDtoPage = recipeESRepository.findAll(PageRequest.of(page-1,12, Sort.by(Sort.Order.desc(filter))));
+        }
         Pagination<RecipeDto> recipeDtoPagination=new Pagination<>();
-        recipeDtoPagination.setTotalPages(recipeEntityPage.getTotalPages());
-        recipeDtoPagination.setObjects(recipeDtos);
+        recipeDtoPagination.setTotalPages(recipeDtoPage.getTotalPages());
+        recipeDtoPagination.setObjects(recipeDtoPage.getContent());
         return recipeDtoPagination;
 
     }
@@ -100,11 +109,10 @@ public class RecipeService {
         );
         recipe.setIngredientRecipes(ingredientRecipes);
         RecipeEntity recipeAfterSave = recipeRepository.save(recipe);
-        RecipeES recipeES =new RecipeES(recipeAfterSave.getId(),recipeAfterSave.getName());
 //        return recipeMapper.toDto(recipeESRepository.save(recipeAfterSave));
-        recipeESRepository.save(recipeES);
-        return recipeMapper.toDto(recipeAfterSave);
-
+        RecipeDto recipeEsDto= recipeMapper.toEsDto(recipeAfterSave);
+        recipeESRepository.save(recipeEsDto);
+        return recipeEsDto;
     }
 
     public void addFavoriteRecipe(Long userId,Long recipeId) {
@@ -176,4 +184,21 @@ public class RecipeService {
         scheduleRecipe.setNote(scheduleRecipeRequest.getNote());
         return scheduleRecipeMapper.toDto(scheduleRecipeRepository.save(scheduleRecipe));
     }
+
+    public Pagination<RecipeDto> getRecipesByKeyword(String keyword,int page){
+        Page<RecipeDto> recipeESPage=recipeESRepository.getRecipesByKeyword(keyword,PageRequest.of(page-1,12));
+        Pagination<RecipeDto> recipeESPagination =new Pagination<>();
+        recipeESPagination.setTotalPages(recipeESPage.getTotalPages());
+        recipeESPagination.setObjects(recipeESPage.getContent());
+        return recipeESPagination;
+    }
+
+    public List<String> getRecipesByKeywordSearchBar(String keyword){
+        Page<RecipeDto> recipeESPage=recipeESRepository.getRecipesByKeyword(keyword,PageRequest.of(0,10));
+//        recipeESPagination.setObjects(recipeESPage.getContent());
+        List<String> recipeNames= new ArrayList<>();
+        recipeNames=recipeESPage.getContent().stream().map(RecipeDto::getName).collect(Collectors.toList());
+        return recipeNames;
+    }
+
 }
