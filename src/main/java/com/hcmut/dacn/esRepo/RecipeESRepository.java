@@ -17,7 +17,7 @@ public interface RecipeESRepository extends ElasticsearchRepository<RecipeDto,Lo
     Page<RecipeDto> getRecipesByKeyword(String keyword, Pageable pageable);
 
     @Query("{\"bool\":{\"should\":{\"match\":{\"name\":{\"query\":\"?0\",\"fuzziness\":2,\"max_expansions\":10,\"prefix_length\":1}}},\"must\":[?1]}}")
-    Page<RecipeDto> getRecipesByKeywordAndFilter(String keyword, String queryFilter, Pageable pageable);
+    Page<RecipeDto> getRecipesByKeywordAndIngredient(String keyword, String queryFilter, Pageable pageable);
 
 
 }

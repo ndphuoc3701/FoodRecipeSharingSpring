@@ -49,20 +49,19 @@ public class RecipeService {
 
     public Pagination<RecipeDto> getAll(String keyword, String filter, String ingredient, int page) {
         Page<RecipeDto> recipeDtoPage;
-
+        String nfdNormalizedString = Normalizer.normalize(keyword, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        keyword= pattern.matcher(nfdNormalizedString).replaceAll("").replace("đ","d");
         if (!ingredient.isEmpty()) {
             String[] ingredientSplit = ingredient.split(" ");
             String queryIngredientReduce = Arrays.stream(ingredientSplit).reduce("", (curr, element) -> curr + "{\"match\":{\"ingredients\":" + element + "}},");
             String queryIngredient = queryIngredientReduce.substring(0, queryIngredientReduce.length() - 1);
             if (filter != null) {
-                recipeDtoPage = recipeESRepository.getRecipesByKeywordAndFilter(keyword == null ? "" : keyword, queryIngredient, PageRequest.of(page - 1, 12, Sort.by(Sort.Order.desc(filter))));
+                recipeDtoPage = recipeESRepository.getRecipesByKeywordAndIngredient(keyword, queryIngredient, PageRequest.of(page - 1, 12, Sort.by(Sort.Order.desc(filter))));
             } else {
-                recipeDtoPage = recipeESRepository.getRecipesByKeywordAndFilter(keyword == null ? "" : keyword, queryIngredient, PageRequest.of(page - 1, 12));
+                recipeDtoPage = recipeESRepository.getRecipesByKeywordAndIngredient(keyword, queryIngredient, PageRequest.of(page - 1, 12));
             }
         } else if (!keyword.isEmpty()) {
-            String nfdNormalizedString = Normalizer.normalize(keyword, Normalizer.Form.NFD);
-            Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-            System.out.println(pattern.matcher(nfdNormalizedString).replaceAll(""));
             if (!filter.isEmpty()) {
                 recipeDtoPage = recipeESRepository.getRecipesByKeyword(keyword, PageRequest.of(page - 1, 12, Sort.by(Sort.Order.desc(filter))));
             }
