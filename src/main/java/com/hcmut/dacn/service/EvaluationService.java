@@ -2,7 +2,9 @@ package com.hcmut.dacn.service;
 
 import com.hcmut.dacn.dto.ImageDto;
 import com.hcmut.dacn.dto.Pagination;
+import com.hcmut.dacn.dto.RecipeDto;
 import com.hcmut.dacn.entity.*;
+import com.hcmut.dacn.esRepo.RecipeESRepository;
 import com.hcmut.dacn.repository.EvaluationRepository;
 import com.hcmut.dacn.repository.RecipeRepository;
 import com.hcmut.dacn.repository.UserRepository;
@@ -25,12 +27,15 @@ public class EvaluationService {
     private EvaluationRepository evaluationRepository;
 
     @Autowired
-    RecipeRepository recipeRepository;
+    private RecipeRepository recipeRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private RecipeESRepository recipeESRepository;
+
     @Autowired
-    EvaluationMapper evaluationMapper;
+    private UserRepository userRepository;
+    @Autowired
+    private EvaluationMapper evaluationMapper;
 
     public Pagination<EvaluationDto> getEvaluationsByRecipeId(Long recipeId, int page) {
         Page<EvaluationEntity> evaluationEntityPage = evaluationRepository.findEvaluationsByRecipe_IdOrderByCreatedDateDesc(recipeId, PageRequest.of(page - 1, 5));
@@ -42,18 +47,20 @@ public class EvaluationService {
         return evaluationDtoPagination;
     }
 
-//    public Pagination<EvaluationDto> getEvaluationsByUserId(Long userId, int page){
-//        return evaluationMapper.toUserDtos(evaluationRepository.findEvaluationsByUser_Id(userId, PageRequest.of(page-1,10)).getContent());
-//    }
-
     public EvaluationDto create(EvaluationRequest evaluationRequest) {
         UserEntity user = userRepository.findById(evaluationRequest.getUserId()).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
-        recipe.setNumEvaluation(recipe.getNumEvaluation() + 1);
-        recipe.setNumStar((recipe.getNumStar() * (recipe.getNumEvaluation() - 1) + evaluationRequest.getNumStar()) / recipe.getNumEvaluation());
-        int numberRecipeOfOwner= evaluationRepository.numberEvaluationOfUserId(recipe.getOwner().getId());
-        recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner)+evaluationRequest.getNumStar())/(numberRecipeOfOwner+1));
-
+        RecipeDto recipeDto = recipeESRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
+        Integer oldNumEvaluation = recipe.getNumEvaluation();
+        recipe.setNumEvaluation(oldNumEvaluation + 1);
+        recipeDto.setNumEvaluation(oldNumEvaluation + 1);
+        Double newNumStar = (recipe.getNumStar() * (recipe.getNumEvaluation() - 1) + evaluationRequest.getNumStar()) / recipe.getNumEvaluation();
+        recipe.setNumStar(newNumStar);
+        recipeDto.setNumStar(newNumStar);
+        int numberRecipeOfOwner = evaluationRepository.numberEvaluationOfUserId(recipe.getOwner().getId());
+        recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner) + evaluationRequest.getNumStar()) / (numberRecipeOfOwner + 1));
+        recipeRepository.save(recipe);
+        recipeESRepository.save(recipeDto);
         EvaluationEntity evaluation = new EvaluationEntity();
         evaluation.setContent(evaluationRequest.getContent());
         evaluation.setNumStar(evaluationRequest.getNumStar());

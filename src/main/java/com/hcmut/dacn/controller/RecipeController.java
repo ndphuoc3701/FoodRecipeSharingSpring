@@ -7,6 +7,7 @@ import com.hcmut.dacn.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
@@ -26,10 +27,24 @@ public class RecipeController {
     public RecipeDto create(@RequestBody RecipeSharingDto recipeRequest){
         return recipeService.create(recipeRequest);
     }
+
+    @PostMapping("list")
+    public List<RecipeDto> createList(@RequestBody List<RecipeSharingDto> recipeRequests){
+        return recipeService.createList(recipeRequests);
+    }
     @GetMapping
     public Pagination<RecipeDto> getRecipesByPage(@RequestParam String keyword, @RequestParam String filter, @RequestParam String ingredient, @RequestParam int page){
         return recipeService.getAll(keyword, filter, ingredient, page);
     }
+
+    @GetMapping("search")
+    public List<String> getRecipesByInput(@RequestParam String keyword){
+        return recipeService.getRecipeByInput(keyword);
+    }
+//    @GetMapping
+//    public void getRecipesByPage(@RequestParam String keyword, @RequestParam String filter, @RequestParam String ingredient, @RequestParam int page) throws IOException {
+//        recipeService.getAll(keyword,);
+//    }
     @GetMapping("users/{userId}")
     public Pagination<RecipeDto> getRecipesByUserId(@PathVariable Long userId,@RequestParam int page){
         return recipeService.getRecipesByUserId(userId,page);
@@ -53,20 +68,5 @@ public class RecipeController {
     @PostMapping("scheduling")
     public void scheduleRecipe(@RequestBody ScheduleRecipeRequest scheduleRecipeRequest){
         recipeService.scheduleRecipe(scheduleRecipeRequest);
-    }
-
-    @GetMapping("post")
-    public Iterable<RecipeDto> getAll(){
-        return recipeESRepository.findAll();
-    }
-
-    @GetMapping("es")
-    public Pagination<RecipeDto> getRecipesByKeyword(@RequestParam String keyword,@RequestParam int page){
-        return recipeService.getRecipesByKeyword(keyword,page);
-    }
-
-    @GetMapping("search")
-    public List<String> getRecipesByKeywordSearchBar(@RequestParam String keyword){
-        return recipeService.getRecipesByKeywordSearchBar(keyword);
     }
 }

@@ -19,9 +19,14 @@ public abstract class RecipeMapper {
     @Mapping(target = "image",expression = "java(new String(recipe.getImageData(),StandardCharsets.UTF_8))")
     public abstract RecipeDto toDto(RecipeEntity recipe);
 
-    @Mapping(target = "ingredients",expression = "java(recipe.getIngredientRecipes().stream().map(IngredientRecipeEntity::getName).collect(Collectors.toList()))")
+//    @Mapping(target = "ingredients",expression = "java(recipe.getIngredientRecipes().stream().reduce(IngredientRecipeEntity::getName).collect(Collectors.toList()))")
+    @Mapping(target = "ingredients",expression = "java(toIngredients(recipe.getName(), recipe.getIngredientRecipes()))")
     @Mapping(target = "image",expression = "java(new String(recipe.getImageData(),StandardCharsets.UTF_8))")
     public abstract RecipeDto toEsDto(RecipeEntity recipe);
+
+    public String toIngredients(String recipeName, List<IngredientRecipeEntity> ingredientRecipeEntities){
+        return ingredientRecipeEntities.stream().map(i->i.getName()+" ").reduce(recipeName+" ", String::concat);
+    }
 
     @IterableMapping(qualifiedByName = "useMe")
     public abstract List<RecipeDto> toDtos(List<RecipeEntity> recipes);

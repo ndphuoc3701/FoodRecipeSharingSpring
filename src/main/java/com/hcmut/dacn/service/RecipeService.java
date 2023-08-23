@@ -1,5 +1,15 @@
 package com.hcmut.dacn.service;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmut.dacn.dto.*;
 import com.hcmut.dacn.esRepo.ProductRepository;
 import com.hcmut.dacn.esRepo.RecipeESRepository;
@@ -8,14 +18,27 @@ import com.hcmut.dacn.mapper.RecipeMapper;
 import com.hcmut.dacn.mapper.ScheduleRecipeMapper;
 import com.hcmut.dacn.repository.*;
 import com.hcmut.dacn.request.ScheduleRecipeRequest;
+import org.apache.http.HttpHost;
+//import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.hcmut.dacn.entity.*;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -42,49 +65,95 @@ public class RecipeService {
     private LearntRecipeMapper learntRecipeMapper;
     @Autowired
     private ScheduleRecipeMapper scheduleRecipeMapper;
+
     @Autowired
     private RecipeESRepository recipeESRepository;
     @Autowired
     private ProductRepository productRepository;
+    RestClient restClient = RestClient
+            .builder(HttpHost.create("http://localhost:9200"))
+            .build();
+    ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+    ElasticsearchClient client = new ElasticsearchClient(transport);
 
     public Pagination<RecipeDto> getAll(String keyword, String filter, String ingredient, int page) {
         Page<RecipeDto> recipeDtoPage;
-        String nfdNormalizedString = Normalizer.normalize(keyword, Normalizer.Form.NFD);
-        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        keyword= pattern.matcher(nfdNormalizedString).replaceAll("").replace("đ","d");
+        List<Query> queries = null;
+        if (!keyword.isEmpty()) {
+            String[] keywordSplit = keyword.split(" ");
+            queries = Arrays.stream(keywordSplit).map(element -> {
+                String unsignedElement = unsignedString(element);
+                String ingredientsField = unsignedElement.equalsIgnoreCase(element) ? "unsignedIngredients" : "ingredients";
+                return MatchQuery.of(m -> m.field(ingredientsField).query(element))._toQuery();
+            }).collect(Collectors.toList());
+        }
         if (!ingredient.isEmpty()) {
             String[] ingredientSplit = ingredient.split(" ");
-            String queryIngredientReduce = Arrays.stream(ingredientSplit).reduce("", (curr, element) -> curr + "{\"match\":{\"ingredients\":" + element + "}},");
-            String queryIngredient = queryIngredientReduce.substring(0, queryIngredientReduce.length() - 1);
-            if (filter != null) {
-                recipeDtoPage = recipeESRepository.getRecipesByKeywordAndIngredient(keyword, queryIngredient, PageRequest.of(page - 1, 12, Sort.by(Sort.Order.desc(filter))));
-            } else {
-                recipeDtoPage = recipeESRepository.getRecipesByKeywordAndIngredient(keyword, queryIngredient, PageRequest.of(page - 1, 12));
-            }
-        } else if (!keyword.isEmpty()) {
-            if (!filter.isEmpty()) {
-                recipeDtoPage = recipeESRepository.getRecipesByKeyword(keyword, PageRequest.of(page - 1, 12, Sort.by(Sort.Order.desc(filter))));
-            }
-            else{
-                recipeDtoPage = recipeESRepository.getRecipesByKeyword(keyword, PageRequest.of(page - 1, 12));
-            }
-        } else {
-            if (!filter.isEmpty()) {
-                recipeDtoPage = recipeESRepository.findAll(PageRequest.of(page - 1, 12, Sort.by(Sort.Order.desc(filter))));
-            } else {
-                recipeDtoPage = recipeESRepository.findAll(PageRequest.of(page - 1, 12));
-            }
+            List<Query> ingredientQuery = Arrays.stream(ingredientSplit).map(element -> MatchQuery.of(m -> m.field("ingredients")
+                    .query(element))._toQuery()).collect(Collectors.toList());
+            if (queries == null) {
+                queries = ingredientQuery;
+            } else queries.addAll(ingredientQuery);
         }
-        Pagination<RecipeDto> recipeDtoPagination = new Pagination<>();
-        recipeDtoPagination.setTotalPages(recipeDtoPage.getTotalPages());
-        recipeDtoPagination.setObjects(recipeDtoPage.getContent());
-        return recipeDtoPagination;
 
+        SearchResponse<RecipeDto> searchResponse = null;
+        try {
+            List<Query> finalQueries = queries;
+            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index("recipe")
+                    .query(q -> q.bool(b -> b
+                            .must(finalQueries)));
+            if (!filter.isEmpty())
+                searchRequestBuilder.sort(so -> so.field(f -> f.field(filter).order(SortOrder.Desc)));
+            if (page != 1)
+                searchRequestBuilder.from((page - 1) * 12).size(12);
+            searchResponse = client.search(searchRequestBuilder.build(), RecipeDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<Hit<RecipeDto>> hits = searchResponse.hits().hits();
+        List<RecipeDto> recipeDtos = hits.stream().map(Hit::source).collect(Collectors.toList());
+
+        Pagination<RecipeDto> recipeDtoPagination = new Pagination<>();
+        recipeDtoPagination.setTotalPages((int) searchResponse.hits().total().value() / 12 + 1);
+        recipeDtoPagination.setObjects(recipeDtos);
+        return recipeDtoPagination;
     }
 
-    //    public RecipeDto getByRecipeId(Long recipeId){
-//        return recipeMapper.toDto(recipeDao.getByRecipeId(recipeId));
-//    }
+    public List<String> getRecipeByInput(String keyword) {
+        List<Query> queries = null;
+        if (!keyword.isEmpty()) {
+            String[] keywordSplit = keyword.split(" ");
+            String lastWord = keywordSplit[keywordSplit.length - 1];
+            String[] keywordSplitExceptLastWord = Arrays.copyOf(keywordSplit, keywordSplit.length - 1);
+            queries = Arrays.stream(keywordSplitExceptLastWord).map(element -> {
+                String unsignedElement = unsignedString(element);
+                String ingredientsField = unsignedElement.equalsIgnoreCase(element) ? "unsignedIngredients" : "ingredients";
+                return MatchQuery.of(m -> m.field(ingredientsField).query(element))._toQuery();
+            }).collect(Collectors.toList());
+            String unsignedLastWord = unsignedString(lastWord);
+            String ingredientsField = unsignedLastWord.equalsIgnoreCase(lastWord) ? "unsignedIngredients" : "ingredients";
+            String wordQuery = unsignedLastWord.equalsIgnoreCase(lastWord) ? unsignedLastWord : lastWord;
+            Query lastWordQuery = MatchQuery.of(m -> m.field(ingredientsField).fuzziness("2").prefixLength(unsignedLastWord.length()).query(wordQuery))._toQuery();
+            queries.add(lastWordQuery);
+        }
+
+        SearchResponse<RecipeDto> searchResponse = null;
+        try {
+            List<Query> finalQueries = queries;
+            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index("recipe")
+                    .query(q -> q.bool(b -> b
+                            .must(finalQueries))).size(10);
+            searchResponse = client.search(searchRequestBuilder.build(), RecipeDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<Hit<RecipeDto>> hits = searchResponse.hits().hits();
+        List<String> recipeDtos = hits.stream().map(h -> h.source().getName()).collect(Collectors.toList());
+        return recipeDtos;
+    }
+
     public Pagination<RecipeDto> getRecipesByUserId(Long userId, int page) {
         Page<RecipeEntity> recipeEntityPage = recipeRepository.findRecipesByOwner_IdOrderByCreatedDateDesc(userId, PageRequest.of(page - 1, 10));
         List<RecipeDto> recipeDtos = recipeMapper.toDtos(recipeEntityPage.getContent());
@@ -129,18 +198,31 @@ public class RecipeService {
                 }
         );
         recipe.setIngredientRecipes(ingredientRecipes);
-//        recipeESRepository.save(recipeMapper.toEsDto(recipeRepository.save(recipe)));
-        return recipeESRepository.save(recipeMapper.toEsDto(recipeRepository.save(recipe)));
+        RecipeDto recipeDto = recipeMapper.toEsDto(recipeRepository.save(recipe));
+        String esIngredients = toEsIngredients(recipe.getName(),ingredientRecipes);
+        recipeDto.setIngredients(esIngredients);
+        recipeDto.setUnsignedIngredients(unsignedString(esIngredients));
+        recipeDto.setUnsignedName(unsignedString(recipe.getName()));
+        return recipeESRepository.save(recipeDto);
+    }
 
+    public String toEsIngredients(String recipeName, List<IngredientRecipeEntity> ingredientRecipeEntities){
+        return ingredientRecipeEntities.stream().map(i->i.getName()+" ").reduce(recipeName+" ", String::concat);
     }
 
     public void addFavoriteRecipe(Long userId, Long recipeId) {
         UserEntity user = userRepository.findById(userId).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(recipeId).orElse(null);
+        RecipeDto recipeDto = recipeESRepository.findById(recipeId).orElse(null);
         FavoriteRecipeEntity favoriteRecipe = new FavoriteRecipeEntity();
         favoriteRecipe.setRecipe(recipe);
         favoriteRecipe.setUser(user);
         favoriteRecipeRepository.save(favoriteRecipe);
+        Integer newNumFavorite = recipe.getNumFavorite() + 1;
+        recipe.setNumFavorite(newNumFavorite);
+        recipeRepository.save(recipe);
+        recipeDto.setNumFavorite(newNumFavorite);
+        recipeESRepository.save(recipeDto);
     }
 
     public Pagination<RecipeDto> getFavoriteRecipesByUserId(Long userId, int page) {
@@ -194,7 +276,7 @@ public class RecipeService {
         return scheduleRecipeDtoPagination;
     }
 
-    public ScheduleRecipeDto scheduleRecipe(ScheduleRecipeRequest scheduleRecipeRequest) {
+    public void scheduleRecipe(ScheduleRecipeRequest scheduleRecipeRequest) {
         UserEntity user = userRepository.findById(scheduleRecipeRequest.getUserId()).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(scheduleRecipeRequest.getRecipeId()).orElse(null);
         ScheduleRecipeEntity scheduleRecipe = new ScheduleRecipeEntity();
@@ -202,23 +284,15 @@ public class RecipeService {
         scheduleRecipe.setRecipe(recipe);
         scheduleRecipe.setScheduleTime(scheduleRecipeRequest.getScheduleTime());
         scheduleRecipe.setNote(scheduleRecipeRequest.getNote());
-        return scheduleRecipeMapper.toDto(scheduleRecipeRepository.save(scheduleRecipe));
     }
 
-    public Pagination<RecipeDto> getRecipesByKeyword(String keyword, int page) {
-        Page<RecipeDto> recipeESPage = recipeESRepository.getRecipesByKeyword(keyword, PageRequest.of(page - 1, 12));
-        Pagination<RecipeDto> recipeESPagination = new Pagination<>();
-        recipeESPagination.setTotalPages(recipeESPage.getTotalPages());
-        recipeESPagination.setObjects(recipeESPage.getContent());
-        return recipeESPagination;
+    private String unsignedString(String signString) {
+        String nfdNormalizedString = Normalizer.normalize(signString, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(nfdNormalizedString).replaceAll("").replace("đ", "d");
     }
 
-    public List<String> getRecipesByKeywordSearchBar(String keyword) {
-        Page<RecipeDto> recipeESPage = recipeESRepository.getRecipesByKeyword(keyword, PageRequest.of(0, 10));
-//        recipeESPagination.setObjects(recipeESPage.getContent());
-        List<String> recipeNames = new ArrayList<>();
-        recipeNames = recipeESPage.getContent().stream().map(RecipeDto::getName).collect(Collectors.toList());
-        return recipeNames;
+    public List<RecipeDto> createList(List<RecipeSharingDto> recipeRequests) {
+        return recipeRequests.stream().map(this::create).collect(Collectors.toList());
     }
-
 }
