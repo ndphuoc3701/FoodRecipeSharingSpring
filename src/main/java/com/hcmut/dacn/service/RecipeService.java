@@ -9,31 +9,20 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmut.dacn.dto.*;
-import com.hcmut.dacn.esRepo.ProductRepository;
 import com.hcmut.dacn.esRepo.RecipeESRepository;
 import com.hcmut.dacn.mapper.LearntRecipeMapper;
 import com.hcmut.dacn.mapper.RecipeMapper;
 import com.hcmut.dacn.mapper.ScheduleRecipeMapper;
 import com.hcmut.dacn.repository.*;
 import com.hcmut.dacn.request.ScheduleRecipeRequest;
+import com.hcmut.dacn.request.ScheduleRecipeTimer;
 import org.apache.http.HttpHost;
-//import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.core.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.hcmut.dacn.entity.*;
@@ -44,6 +33,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -68,8 +58,6 @@ public class RecipeService {
 
     @Autowired
     private RecipeESRepository recipeESRepository;
-    @Autowired
-    private ProductRepository productRepository;
     RestClient restClient = RestClient
             .builder(HttpHost.create("http://localhost:9200"))
             .build();
@@ -199,22 +187,24 @@ public class RecipeService {
         );
         recipe.setIngredientRecipes(ingredientRecipes);
         RecipeDto recipeDto = recipeMapper.toEsDto(recipeRepository.save(recipe));
-        String esIngredients = toEsIngredients(recipe.getName(),ingredientRecipes);
+        String esIngredients = toEsIngredients(recipe.getName(), ingredientRecipes);
         recipeDto.setIngredients(esIngredients);
         recipeDto.setUnsignedIngredients(unsignedString(esIngredients));
         recipeDto.setUnsignedName(unsignedString(recipe.getName()));
-        return recipeESRepository.save(recipeDto);
+//        return recipeESRepository.save(recipeDto);
+        return null;
     }
 
-    public String toEsIngredients(String recipeName, List<IngredientRecipeEntity> ingredientRecipeEntities){
-        return ingredientRecipeEntities.stream().map(i->i.getName()+" ").reduce(recipeName+" ", String::concat);
+    public String toEsIngredients(String recipeName, List<IngredientRecipeEntity> ingredientRecipeEntities) {
+        return ingredientRecipeEntities.stream().map(i -> i.getName() + " ").reduce(recipeName + " ", String::concat);
     }
 
     public void addFavoriteRecipe(Long userId, Long recipeId) {
         UserEntity user = userRepository.findById(userId).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(recipeId).orElse(null);
-        RecipeDto recipeDto = recipeESRepository.findById(recipeId).orElse(null);
+//        RecipeDto recipeDto = recipeESRepository.findById(recipeId).orElse(null);
         FavoriteRecipeEntity favoriteRecipe = new FavoriteRecipeEntity();
+        RecipeDto recipeDto = new RecipeDto();
         favoriteRecipe.setRecipe(recipe);
         favoriteRecipe.setUser(user);
         favoriteRecipeRepository.save(favoriteRecipe);
@@ -222,7 +212,7 @@ public class RecipeService {
         recipe.setNumFavorite(newNumFavorite);
         recipeRepository.save(recipe);
         recipeDto.setNumFavorite(newNumFavorite);
-        recipeESRepository.save(recipeDto);
+//        recipeESRepository.save(recipeDto);
     }
 
     public Pagination<RecipeDto> getFavoriteRecipesByUserId(Long userId, int page) {
@@ -284,6 +274,9 @@ public class RecipeService {
         scheduleRecipe.setRecipe(recipe);
         scheduleRecipe.setScheduleTime(scheduleRecipeRequest.getScheduleTime());
         scheduleRecipe.setNote(scheduleRecipeRequest.getNote());
+        scheduleRecipeRepository.save(scheduleRecipe);
+        ScheduleRecipeTimerDto scheduleRecipeTimerDto = new ScheduleRecipeTimerDto(recipe.getName(),new String(recipe.getImageData(),StandardCharsets.UTF_8),scheduleRecipeRequest.getScheduleTime());
+        new Timer().schedule(new ScheduleRecipeTimer(scheduleRecipeTimerDto, scheduleRecipeRequest.getUserId(), simpMessagingTemplate), scheduleRecipeRequest.getScheduleTime());
     }
 
     private String unsignedString(String signString) {
@@ -295,4 +288,13 @@ public class RecipeService {
     public List<RecipeDto> createList(List<RecipeSharingDto> recipeRequests) {
         return recipeRequests.stream().map(this::create).collect(Collectors.toList());
     }
+
+    @Autowired
+    SimpMessagingTemplate simpMessagingTemplate;
+
+//    public void sendNotification(Schedule schedule) {
+////        String address = "/queue/"+schedule.getUserId()+"/notification";
+////        simpMessagingTemplate.convertAndSend(address, schedule.getContent());
+//        new Timer().schedule(new ScheduleTest(schedule.getContent(), schedule.getUserId(), simpMessagingTemplate), schedule.getScheduleTime());
+//    }
 }

@@ -50,8 +50,9 @@ public class EvaluationService {
     public EvaluationDto create(EvaluationRequest evaluationRequest) {
         UserEntity user = userRepository.findById(evaluationRequest.getUserId()).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
-        RecipeDto recipeDto = recipeESRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
+//        RecipeDto recipeDto = recipeESRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
         Integer oldNumEvaluation = recipe.getNumEvaluation();
+        RecipeDto recipeDto=new RecipeDto();
         recipe.setNumEvaluation(oldNumEvaluation + 1);
         recipeDto.setNumEvaluation(oldNumEvaluation + 1);
         Double newNumStar = (recipe.getNumStar() * (recipe.getNumEvaluation() - 1) + evaluationRequest.getNumStar()) / recipe.getNumEvaluation();
@@ -60,7 +61,7 @@ public class EvaluationService {
         int numberRecipeOfOwner = evaluationRepository.numberEvaluationOfUserId(recipe.getOwner().getId());
         recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner) + evaluationRequest.getNumStar()) / (numberRecipeOfOwner + 1));
         recipeRepository.save(recipe);
-        recipeESRepository.save(recipeDto);
+//        recipeESRepository.save(recipeDto);
         EvaluationEntity evaluation = new EvaluationEntity();
         evaluation.setContent(evaluationRequest.getContent());
         evaluation.setNumStar(evaluationRequest.getNumStar());

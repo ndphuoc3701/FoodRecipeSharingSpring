@@ -1,6 +1,6 @@
 package com.hcmut.dacn;
 
-import com.hcmut.dacn.esRepo.RecipeESRepository;
+//import com.hcmut.dacn.esRepo.RecipeESRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -9,8 +9,8 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableElasticsearchRepositories("com.hcmut.dacn.esRepo")
-@EnableJpaRepositories("com.hcmut.dacn.repository")
+//@EnableElasticsearchRepositories("com.hcmut.dacn.esRepo")
+//@EnableJpaRepositories("com.hcmut.dacn.repository")
 public class FoodRecipeSharingApplication {
 
 	public static void main(String[] args) {

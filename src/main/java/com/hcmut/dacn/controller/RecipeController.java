@@ -1,14 +1,20 @@
 package com.hcmut.dacn.controller;
 
 import com.hcmut.dacn.dto.*;
-import com.hcmut.dacn.esRepo.RecipeESRepository;
+import com.hcmut.dacn.request.Message;
+import com.hcmut.dacn.request.Schedule;
 import com.hcmut.dacn.request.ScheduleRecipeRequest;
 import com.hcmut.dacn.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Timer;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
 @RestController
@@ -16,8 +22,6 @@ import java.util.List;
 public class RecipeController {
     @Autowired
     private RecipeService recipeService;
-    @Autowired
-    private RecipeESRepository recipeESRepository;
 
     @GetMapping("{recipeId}")
     public RecipeDetailDto getRecipeDetailById(@PathVariable Long recipeId){
@@ -69,4 +73,11 @@ public class RecipeController {
     public void scheduleRecipe(@RequestBody ScheduleRecipeRequest scheduleRecipeRequest){
         recipeService.scheduleRecipe(scheduleRecipeRequest);
     }
+
+//    @MessageMapping("/application")
+//    @SendTo("/all/messages")
+//    public Message send(final Message message) throws Exception {
+//        return message;
+//    }
+
 }
