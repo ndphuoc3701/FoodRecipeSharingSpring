@@ -24,31 +24,27 @@ public class RecipeController {
     private RecipeService recipeService;
 
     @GetMapping("{recipeId}")
-    public RecipeDetailDto getRecipeDetailById(@PathVariable Long recipeId){
-        return recipeService.getRecipeDetailById(recipeId);
+    public RecipeDetailDto getRecipeDetailById(@PathVariable Long recipeId,@RequestParam Long userId){
+        return recipeService.getRecipeDetailById(recipeId,userId);
     }
     @PostMapping
     public RecipeDto create(@RequestBody RecipeSharingDto recipeRequest){
         return recipeService.create(recipeRequest);
     }
-
-    @PostMapping("list")
-    public List<RecipeDto> createList(@RequestBody List<RecipeSharingDto> recipeRequests){
-        return recipeService.createList(recipeRequests);
-    }
+//
+//    @PostMapping("list")
+//    public List<RecipeDto> createList(@RequestBody List<RecipeSharingDto> recipeRequests){
+//        return recipeService.createList(recipeRequests);
+//    }
     @GetMapping
-    public Pagination<RecipeDto> getRecipesByPage(@RequestParam String keyword, @RequestParam String filter, @RequestParam String ingredient, @RequestParam int page){
-        return recipeService.getAll(keyword, filter, ingredient, page);
+    public Pagination<RecipeDto> getRecipesByPage(@RequestParam Long userId, @RequestParam String keyword, @RequestParam String filter, @RequestParam String ingredient, @RequestParam int page){
+        return recipeService.getAll(userId, keyword, filter, ingredient, page);
     }
 
     @GetMapping("search")
     public List<String> getRecipesByInput(@RequestParam String keyword){
         return recipeService.getRecipeByInput(keyword);
     }
-//    @GetMapping
-//    public void getRecipesByPage(@RequestParam String keyword, @RequestParam String filter, @RequestParam String ingredient, @RequestParam int page) throws IOException {
-//        recipeService.getAll(keyword,);
-//    }
     @GetMapping("users/{userId}")
     public Pagination<RecipeDto> getRecipesByUserId(@PathVariable Long userId,@RequestParam int page){
         return recipeService.getRecipesByUserId(userId,page);
@@ -56,6 +52,10 @@ public class RecipeController {
     @PostMapping("favorite")
     public void addFavoriteRecipe(@RequestParam Long userId,@RequestParam Long recipeId){
         recipeService.addFavoriteRecipe(userId,recipeId);
+    }
+    @DeleteMapping("favorite")
+    public void deleteFavoriteRecipe(@RequestParam Long userId,@RequestParam Long recipeId){
+        recipeService.deleteFavoriteRecipe(userId,recipeId);
     }
     @GetMapping("favorite")
     public Pagination<RecipeDto> getFavoriteRecipesByUserId(@RequestParam Long userId,@RequestParam int page){
@@ -72,6 +72,14 @@ public class RecipeController {
     @PostMapping("scheduling")
     public void scheduleRecipe(@RequestBody ScheduleRecipeRequest scheduleRecipeRequest){
         recipeService.scheduleRecipe(scheduleRecipeRequest);
+    }
+    @PutMapping("scheduling")
+    public void updateScheduleRecipe(@RequestBody ScheduleRecipeRequest scheduleRecipeRequest){
+        recipeService.updateScheduleRecipe(scheduleRecipeRequest);
+    }
+    @DeleteMapping("scheduling")
+    public void deleteScheduleRecipe(@RequestParam Long recipeId, @RequestParam Long userId){
+        recipeService.deleteScheduleRecipe(userId, recipeId);
     }
 
 //    @MessageMapping("/application")

@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ScheduleRecipeRepository extends JpaRepository<ScheduleRecipeEntity,Long> {
     Page<ScheduleRecipeEntity> findScheduleRecipesByUser_IdOrderByScheduleTimeDesc(Long userId, Pageable pageable);
-
+    ScheduleRecipeEntity findByUser_IdAndRecipe_Id(Long userId, Long recipeId);
 }

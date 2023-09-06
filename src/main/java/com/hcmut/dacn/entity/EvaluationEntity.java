@@ -27,7 +27,7 @@ public class EvaluationEntity {
     private Integer numDislike=0;
 
     @Column(name = "num_star", nullable = false)
-    private Double numStar;
+    private Integer numStar;
 
     private String note;
 

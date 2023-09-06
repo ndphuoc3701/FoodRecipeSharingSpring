@@ -12,7 +12,7 @@ public class EvaluationRequest {
 
     private Long userId;
 
-    private Double numStar;
+    private Integer numStar;
 
     private String content;
 

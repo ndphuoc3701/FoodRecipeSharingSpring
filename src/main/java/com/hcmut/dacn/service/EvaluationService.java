@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class EvaluationService {
@@ -52,15 +53,11 @@ public class EvaluationService {
         RecipeEntity recipe = recipeRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
 //        RecipeDto recipeDto = recipeESRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
         Integer oldNumEvaluation = recipe.getNumEvaluation();
-        RecipeDto recipeDto=new RecipeDto();
+        RecipeDto recipeDto = new RecipeDto();
         recipe.setNumEvaluation(oldNumEvaluation + 1);
         recipeDto.setNumEvaluation(oldNumEvaluation + 1);
-        Double newNumStar = (recipe.getNumStar() * (recipe.getNumEvaluation() - 1) + evaluationRequest.getNumStar()) / recipe.getNumEvaluation();
-        recipe.setNumStar(newNumStar);
-        recipeDto.setNumStar(newNumStar);
-        int numberRecipeOfOwner = evaluationRepository.numberEvaluationOfUserId(recipe.getOwner().getId());
-        recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner) + evaluationRequest.getNumStar()) / (numberRecipeOfOwner + 1));
-        recipeRepository.save(recipe);
+        updateNumStarRecipe(recipe, evaluationRequest.getNumStar());
+        recipeDto.setNumStar(recipe.getNumStar());
 //        recipeESRepository.save(recipeDto);
         EvaluationEntity evaluation = new EvaluationEntity();
         evaluation.setContent(evaluationRequest.getContent());
@@ -77,6 +74,7 @@ public class EvaluationService {
                 }
         );
         evaluation.setImages(images);
+        updateEvaluationLevelOfUser(user, 5);
 
         LearntRecipeEntity learntRecipe = new LearntRecipeEntity();
         learntRecipe.setEvaluation(evaluation);
@@ -85,5 +83,46 @@ public class EvaluationService {
         evaluation.setLearntRecipe(learntRecipe);
 
         return evaluationMapper.toDto(evaluationRepository.save(evaluation));
+    }
+
+    public void likeOrDislikeEvaluation(Long evaluationId, boolean isLike) {
+        EvaluationEntity evaluation = evaluationRepository.findById(evaluationId).orElse(null);
+        int updateNumLike = 0;
+        if (isLike) {
+            evaluation.setNumLike(evaluation.getNumLike() + 1);
+            if (Objects.equals(evaluation.getNumLike(), evaluation.getNumDislike()))
+                updateNumLike = 5;
+            else
+                updateNumLike = 1;
+        } else {
+            evaluation.setNumDislike(evaluation.getNumDislike() + 1);
+            if (Objects.equals(evaluation.getNumLike() + 1, evaluation.getNumDislike()))
+                updateNumLike = -5;
+            else
+                updateNumLike = -1;
+        }
+        updateEvaluationLevelOfUser(evaluation.getUser(), updateNumLike);
+
+        if (evaluation.getNumLike() >= evaluation.getNumDislike() - 1)
+            updateNumStarRecipe(evaluation.getRecipe(), isLike ? evaluation.getNumStar() : -evaluation.getNumStar());
+        evaluationRepository.save(evaluation);
+    }
+
+    private void updateNumStarRecipe(RecipeEntity recipe, Integer updatedNumStarEvaluation) {
+        Integer updateNumLike = updatedNumStarEvaluation > 0 ? 1 : -1;
+        int totalLikeRecipe = recipe.getNumLike() + updateNumLike;
+        Double oldNumStarRecipe = recipe.getNumStar();
+        if (totalLikeRecipe == 0)
+            recipe.setNumStar(0.0);
+        else
+            recipe.setNumStar((recipe.getNumStar() * recipe.getNumLike() + updatedNumStarEvaluation) / totalLikeRecipe);
+        recipe.setNumLike(totalLikeRecipe);
+        int numberRecipeOfOwner = recipeRepository.numberRecipeOfUserId(recipe.getOwner().getId());
+        recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner) + (recipe.getNumStar()-oldNumStarRecipe)) / numberRecipeOfOwner);
+    }
+
+    private void updateEvaluationLevelOfUser(UserEntity user, int numLike) {
+        user.setNumLike(user.getNumLike() + numLike);
+        user.setEvaluationLevel((double) user.getNumLike() / 100);
     }
 }

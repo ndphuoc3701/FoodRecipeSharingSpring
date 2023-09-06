@@ -16,7 +16,7 @@ public class EvaluationDto {
 
     private Integer numDislike;
 
-    private Double numStar;
+    private Integer numStar;
 
     private String note;
 

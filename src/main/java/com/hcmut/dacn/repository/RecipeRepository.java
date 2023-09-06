@@ -13,6 +13,9 @@ import java.util.List;
 public interface RecipeRepository extends JpaRepository<RecipeEntity,Long> {
 //    List<RecipeEntity> findRecipeByPage(Pagea)
     Page<RecipeEntity> findRecipesByOwner_IdOrderByCreatedDateDesc(Long userId, Pageable pageable);
+//    @Query("select r from RecipeEntity r where r.name like %:name")
+    List<RecipeEntity> findByNameContains(String title);
 
-
+    @Query("SELECT COUNT(*) FROM RecipeEntity e WHERE e.owner.id=:userId")
+    int numberRecipeOfUserId(Long userId);
 }

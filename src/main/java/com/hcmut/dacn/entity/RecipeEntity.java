@@ -26,30 +26,32 @@ public class RecipeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private byte[] imageData;
 
     @Column(name = "num_star", nullable = false, columnDefinition = "float8 default 0")
-    private Double numStar=(double)0;
+    private Double numStar = (double) 0;
 
     @Column(name = "num_evaluation", nullable = false, columnDefinition = "int8 default 0")
-    private Integer numEvaluation=0;
+    private Integer numEvaluation = 0;
 
     @Column(name = "num_favorite", nullable = false, columnDefinition = "int8 default 0")
-    private Integer numFavorite=0;
+    private Integer numFavorite = 0;
+
+    @Column(name = "num_like", nullable = false, columnDefinition = "int8 default 0")
+    private Integer numLike = 0;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id",nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;
 
-    @OneToMany(mappedBy = "recipe",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<InstructionEntity> instructions;
 
-    @OneToMany(mappedBy = "recipe",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<IngredientRecipeEntity> ingredientRecipes;
 
     @CreationTimestamp
-    @Column(name = "created_date",nullable = false, columnDefinition = "date default current_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
+    @Column(name = "created_date", nullable = false, columnDefinition = "date default current_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date createdDate;
 }

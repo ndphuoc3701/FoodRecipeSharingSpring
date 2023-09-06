@@ -40,7 +40,4 @@ public class RecipeDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd",timezone = "Asia/Ho_Chi_Minh")
     private Date createdDate;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
-    private Date scheduledDate;
 }

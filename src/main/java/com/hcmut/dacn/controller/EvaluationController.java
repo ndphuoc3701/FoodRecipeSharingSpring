@@ -26,4 +26,9 @@ public class EvaluationController {
     public EvaluationDto create(@RequestBody EvaluationRequest evaluationRequest){
         return evaluationService.create(evaluationRequest);
     }
+
+    @GetMapping("{evaluationId}")
+    public void likeOrDislikeEvaluation(@PathVariable Long evaluationId, @RequestParam boolean isLike){
+        evaluationService.likeOrDislikeEvaluation(evaluationId,isLike);
+    }
 }

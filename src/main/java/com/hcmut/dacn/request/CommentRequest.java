@@ -1,11 +1,18 @@
 package com.hcmut.dacn.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
-@Data
+//@Data
 public class CommentRequest {
-    private String content;
-    private Long userId;
-    private Long evaluationId;
+    private boolean favorite;
+    public void setFavorite(boolean favorite){
+        this.favorite=favorite;
+    }
+//    public boolean isFavorite(){
+//        return favorite;
+//    }
 }

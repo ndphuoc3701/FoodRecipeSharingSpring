@@ -1,6 +1,7 @@
 package com.hcmut.dacn.mapper;
 
 import com.hcmut.dacn.dto.*;
+import com.hcmut.dacn.dto.admin.RecipeAdmin;
 import com.hcmut.dacn.entity.*;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
@@ -19,6 +20,10 @@ public abstract class RecipeMapper {
     @Mapping(target = "image",expression = "java(new String(recipe.getImageData(),StandardCharsets.UTF_8))")
     public abstract RecipeDto toDto(RecipeEntity recipe);
 
+//    @Named(value = "admin")
+    @Mapping(target = "ownerId",source = "recipe.owner.id")
+    public abstract RecipeAdmin toAdminDto(RecipeEntity recipe);
+
 //    @Mapping(target = "ingredients",expression = "java(recipe.getIngredientRecipes().stream().reduce(IngredientRecipeEntity::getName).collect(Collectors.toList()))")
     @Mapping(target = "ingredients",expression = "java(toIngredients(recipe.getName(), recipe.getIngredientRecipes()))")
     @Mapping(target = "image",expression = "java(new String(recipe.getImageData(),StandardCharsets.UTF_8))")
@@ -30,6 +35,9 @@ public abstract class RecipeMapper {
 
     @IterableMapping(qualifiedByName = "useMe")
     public abstract List<RecipeDto> toDtos(List<RecipeEntity> recipes);
+
+//    @IterableMapping(qualifiedByName = "useMe")
+    public abstract List<RecipeAdmin> toAdminDtos(List<RecipeEntity> recipes);
 
     @Mapping(target = "recipe",source = "recipe")
     @Mapping(target = "recipeSharing.ingredients", source = "recipe.ingredientRecipes")

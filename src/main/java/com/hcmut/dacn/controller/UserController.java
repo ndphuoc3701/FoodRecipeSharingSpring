@@ -1,5 +1,7 @@
 package com.hcmut.dacn.controller;
 
+import com.hcmut.dacn.request.CommentRequest;
+import com.hcmut.dacn.request.EvaluationRequest;
 import com.hcmut.dacn.request.UserRequest;
 import com.hcmut.dacn.service.UserService;
 import com.hcmut.dacn.dto.UserDto;
@@ -58,5 +60,15 @@ public class UserController {
     @GetMapping("info/{userId}")
     public UserDto getUserInfo(@PathVariable Long userId){
         return userService.getUserInfo(userId);
+    }
+
+    @PostMapping("tesst")
+    public CommentRequest c(@RequestBody CommentRequest commentRequest){
+        return commentRequest;
+    }
+
+    @PostMapping("test")
+    public EvaluationRequest cd(EvaluationRequest commentRequest){
+        return commentRequest;
     }
 }

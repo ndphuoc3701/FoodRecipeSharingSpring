@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UserService {
@@ -20,18 +21,10 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private UserMapper userMapper;
-    public List<UserDto> getAll(){
-//        return userMapper.toDtos(userDao.getAll());
-        return userMapper.toDtos(userRepository.findAll());
-    }
-    public UserDto getByUserId(Long userId){
-//        return userMapper.toDto(userDao.getByUserId(userId));
-        return userMapper.toDto(userRepository.findById(userId).orElse(null));
-    }
 
     public UserDto create(UserRequest userRequest){
-        List<UserEntity> checkIfUserExited=userRepository.findByUsername(userRequest.getUsername());
-        if (!checkIfUserExited.isEmpty()){
+        UserEntity checkIfUserExited=userRepository.findByUsername(userRequest.getUsername());
+        if (checkIfUserExited!=null){
             throw new AlreadyExistedEntityException("User already existed");
         }
         UserEntity user=new UserEntity();
@@ -43,9 +36,10 @@ public class UserService {
     }
 
     public UserDto login(UserRequest userRequest){
-        List<UserEntity> users= userRepository.findByUsername(userRequest.getUsername());
-        if(users.isEmpty())throw new NotFoundEntityException("User not found");
-        return userMapper.toDto(users.get(0));
+        UserEntity user= userRepository.findByUsername(userRequest.getUsername());
+        if(user==null || !Objects.equals(userRequest.getPassword(), user.getPassword()))
+            throw new NotFoundEntityException("User not found");
+        return userMapper.toDto(user);
     }
 
     public void updateImage(UserDto userDto){

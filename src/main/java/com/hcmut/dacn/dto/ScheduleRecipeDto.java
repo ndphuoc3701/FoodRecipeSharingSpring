@@ -15,11 +15,4 @@ public class ScheduleRecipeDto {
     private Date scheduleTime;
 
     private String note;
-
-    @Data
-    public static class EvaluationLearntRecipeDto {
-        private Long id;
-        private String name;
-        private String image;
-    }
 }

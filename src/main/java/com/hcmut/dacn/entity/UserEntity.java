@@ -30,6 +30,8 @@ public class UserEntity {
     private byte[] imageData;
     private String username;
     private String password;
+    private Integer numLike=0;
+
 
     @Column(name = "cook_level", nullable = false, columnDefinition = "float8 default 0")
     private Double cookLevel=(double)0;
