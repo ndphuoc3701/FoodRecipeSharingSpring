@@ -30,10 +30,7 @@ import com.hcmut.dacn.entity.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -315,8 +312,9 @@ public class RecipeService {
         scheduleRecipe.setScheduleTime(scheduleRecipeRequest.getScheduleTime());
         scheduleRecipe.setNote(scheduleRecipeRequest.getNote());
         scheduleRecipeRepository.save(scheduleRecipe);
-        ScheduleRecipeTimerDto scheduleRecipeTimerDto = new ScheduleRecipeTimerDto(recipe.getName(),new String(recipe.getImageData(),StandardCharsets.UTF_8),scheduleRecipeRequest.getScheduleTime());
-        new Timer().schedule(new ScheduleRecipeTimer(scheduleRecipeTimerDto, scheduleRecipeRequest.getUserId(), simpMessagingTemplate), scheduleRecipeRequest.getScheduleTime());
+        scheduleTimer(scheduleRecipe.getRecipe(),scheduleRecipe.getScheduleTime(),scheduleRecipe.getUser().getId());
+//        ScheduleRecipeTimerDto scheduleRecipeTimerDto = new ScheduleRecipeTimerDto(recipe.getName(),new String(recipe.getImageData(),StandardCharsets.UTF_8),scheduleRecipe.getRecipe().getId(),scheduleRecipeRequest.getScheduleTime());
+//        new Timer().schedule(new ScheduleRecipeTimer(scheduleRecipeTimerDto, scheduleRecipeRequest.getUserId(), simpMessagingTemplate,scheduleRecipeRepository), scheduleRecipeRequest.getScheduleTime());
     }
 
     public void updateScheduleRecipe(ScheduleRecipeRequest scheduleRecipeRequest) {
@@ -324,8 +322,14 @@ public class RecipeService {
         scheduleRecipe.setScheduleTime(scheduleRecipeRequest.getScheduleTime());
         scheduleRecipe.setNote(scheduleRecipeRequest.getNote());
         scheduleRecipeRepository.save(scheduleRecipe);
-        ScheduleRecipeTimerDto scheduleRecipeTimerDto = new ScheduleRecipeTimerDto(scheduleRecipe.getRecipe().getName(),new String(scheduleRecipe.getRecipe().getImageData(),StandardCharsets.UTF_8),scheduleRecipeRequest.getScheduleTime());
-        new Timer().schedule(new ScheduleRecipeTimer(scheduleRecipeTimerDto, scheduleRecipeRequest.getUserId(), simpMessagingTemplate), scheduleRecipeRequest.getScheduleTime());
+        scheduleTimer(scheduleRecipe.getRecipe(),scheduleRecipe.getScheduleTime(),scheduleRecipe.getUser().getId());
+//        ScheduleRecipeTimerDto scheduleRecipeTimerDto = new ScheduleRecipeTimerDto(scheduleRecipe.getRecipe().getName(),new String(scheduleRecipe.getRecipe().getImageData(),StandardCharsets.UTF_8),scheduleRecipe.getRecipe().getId(),scheduleRecipeRequest.getScheduleTime());
+//        new Timer().schedule(new ScheduleRecipeTimer(scheduleRecipeTimerDto, scheduleRecipeRequest.getUserId(), simpMessagingTemplate,scheduleRecipeRepository), scheduleRecipeRequest.getScheduleTime());
+    }
+
+    private void scheduleTimer(RecipeEntity recipe, Date time, Long userId){
+        ScheduleRecipeTimerDto scheduleRecipeTimerDto = new ScheduleRecipeTimerDto(recipe.getName(),new String(recipe.getImageData(),StandardCharsets.UTF_8),recipe.getId(),time);
+        new Timer().schedule(new ScheduleRecipeTimer(scheduleRecipeTimerDto, userId, simpMessagingTemplate,scheduleRecipeRepository), time);
     }
 
     private String unsignedString(String signString) {
