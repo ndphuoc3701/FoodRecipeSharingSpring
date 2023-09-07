@@ -30,10 +30,7 @@ import com.hcmut.dacn.entity.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -290,8 +287,9 @@ public class RecipeService {
         return recipeDetail;
     }
 
-    public Pagination<ScheduleRecipeDto> getScheduledRecipesByUserId(Long userId, int page) {
-        Page<ScheduleRecipeEntity> scheduleRecipePage = scheduleRecipeRepository.findScheduleRecipesByUser_IdOrderByScheduleTimeDesc(userId, PageRequest.of(page - 1, 10));
+    public Pagination<ScheduleRecipeDto> getScheduledRecipesByUserId(boolean old, Long userId, int page) {
+        Date currentTime=new Date();
+        Page<ScheduleRecipeEntity> scheduleRecipePage = old? scheduleRecipeRepository.findOldByUser_Id(userId, currentTime, PageRequest.of(page - 1, 10)):scheduleRecipeRepository.findByUser_Id(userId, currentTime, PageRequest.of(page - 1, 10));
         List<ScheduleRecipeEntity> scheduleRecipeEntities = scheduleRecipePage.getContent();
         List<ScheduleRecipeDto> scheduleRecipeDtos = scheduleRecipeMapper.toDtos(scheduleRecipeEntities);
         List<Long> favoriteRecipeIds = favoriteRecipeRepository.findRecipesByUser_Id(userId);

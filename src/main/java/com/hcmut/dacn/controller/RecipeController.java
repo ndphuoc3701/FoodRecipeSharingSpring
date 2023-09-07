@@ -66,8 +66,8 @@ public class RecipeController {
         return recipeService.getLearntRecipesByUserId(userId,page);
     }
     @GetMapping("scheduling")
-    public Pagination<ScheduleRecipeDto> getScheduledRecipesByUserId(@RequestParam Long userId, @RequestParam int page){
-        return recipeService.getScheduledRecipesByUserId(userId,page);
+    public Pagination<ScheduleRecipeDto> getScheduledRecipesByUserId(@RequestParam boolean old, @RequestParam Long userId, @RequestParam int page){
+        return recipeService.getScheduledRecipesByUserId(old, userId,page);
     }
     @PostMapping("scheduling")
     public void scheduleRecipe(@RequestBody ScheduleRecipeRequest scheduleRecipeRequest){

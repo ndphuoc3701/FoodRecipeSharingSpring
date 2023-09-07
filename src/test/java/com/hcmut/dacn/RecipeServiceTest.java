@@ -212,8 +212,8 @@ public class RecipeServiceTest {
         when(favoriteRecipeRepository.findRecipesByUser_Id(USER_ID)).thenReturn(Collections.singletonList(1L));
         Page<ScheduleRecipeEntity> scheduleRecipePage=new PageImpl<ScheduleRecipeEntity>(recipes);
         when(scheduleRecipeMapper.toDtos(recipes)).thenReturn(recipeDtos);
-        when(scheduleRecipeRepository.findScheduleRecipesByUser_IdOrderByScheduleTimeDesc(USER_ID, PageRequest.of(0, 10))).thenReturn(scheduleRecipePage);
-        Pagination<ScheduleRecipeDto> scheduleRecipeDtoPaginationActual = recipeService.getScheduledRecipesByUserId(USER_ID,1);
+        when(scheduleRecipeRepository.findByUser_Id(eq(USER_ID), any(Date.class), eq(PageRequest.of(0, 10)))).thenReturn(scheduleRecipePage);
+        Pagination<ScheduleRecipeDto> scheduleRecipeDtoPaginationActual = recipeService.getScheduledRecipesByUserId(false,USER_ID,1);
         Assert.assertEquals(scheduleRecipePage.getTotalPages(),scheduleRecipeDtoPaginationActual.getTotalPages());
         Assert.assertEquals(scheduleRecipeDtoPaginationActual.getObjects(),recipeDtos);
     }

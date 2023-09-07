@@ -11,7 +11,7 @@ public class ScheduleRecipeDto {
 
     private RecipeDto recipe;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm",timezone = "Asia/Ho_Chi_Minh")
     private Date scheduleTime;
 
     private String note;
