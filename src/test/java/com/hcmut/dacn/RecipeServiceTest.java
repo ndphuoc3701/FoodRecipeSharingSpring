@@ -205,6 +205,11 @@ public class RecipeServiceTest {
         recipeDto2.setNote("note1");
         recipeDtos.add(recipeDto1);
         recipeDtos.add(recipeDto2);
+        RecipeDto recipeDto =new RecipeDto();
+        recipeDto.setId(1L);
+        recipeDto1.setRecipe(recipeDto);
+        recipeDto2.setRecipe(recipeDto);
+        when(favoriteRecipeRepository.findRecipesByUser_Id(USER_ID)).thenReturn(Collections.singletonList(1L));
         Page<ScheduleRecipeEntity> scheduleRecipePage=new PageImpl<ScheduleRecipeEntity>(recipes);
         when(scheduleRecipeMapper.toDtos(recipes)).thenReturn(recipeDtos);
         when(scheduleRecipeRepository.findScheduleRecipesByUser_IdOrderByScheduleTimeDesc(USER_ID, PageRequest.of(0, 10))).thenReturn(scheduleRecipePage);
@@ -247,6 +252,9 @@ public class RecipeServiceTest {
         List<RecipeDto> recipeDtos=new ArrayList<>();
         RecipeDto recipeDto1=new RecipeDto();
         recipeDto1.setName("name1");
+        recipeDto1.setId(1L);
+        when(favoriteRecipeRepository.findRecipesByUser_Id(USER_ID)).thenReturn(Collections.singletonList(1L));
+
         RecipeDto recipeDto2=new RecipeDto();
         recipeDto2.setName("name2");
         recipeDtos.add(recipeDto1);
@@ -268,13 +276,42 @@ public class RecipeServiceTest {
         List<LearntRecipeEntity> learntRecipes= Collections.singletonList(learntRecipe);
         Page<LearntRecipeEntity> learntRecipePage=new PageImpl<>(learntRecipes);
         when(learntRecipeRepository.findLearntRecipesByUser_IdOrderByEvaluation_CreatedDateDesc(USER_ID,PageRequest.of(0, 10))).thenReturn(learntRecipePage);
-
         LearntRecipeDto learntRecipeDto=new LearntRecipeDto();
         EvaluationDto evaluationDto=new EvaluationDto();
+        RecipeDto recipeDto =new RecipeDto();
+        recipeDto.setId(1L);
+        learntRecipeDto.setRecipe(recipeDto);
+        when(favoriteRecipeRepository.findRecipesByUser_Id(USER_ID)).thenReturn(Collections.singletonList(1L));
         learntRecipeDto.setEvaluation(evaluationDto);
         List<LearntRecipeDto> learntRecipeDtos=Collections.singletonList(learntRecipeDto);
         when(learntRecipeMapper.toDTOs(learntRecipes)).thenReturn(learntRecipeDtos);
         Pagination<LearntRecipeDto> learntRecipeDtoPagination=recipeService.getLearntRecipesByUserId(USER_ID,1);
         Assert.assertEquals(learntRecipeDtoPagination.getObjects(),learntRecipeDtos);
+    }
+
+    @Test
+    public void testDeleteScheduleRecipe(){
+        ScheduleRecipeEntity scheduleRecipe=new ScheduleRecipeEntity();
+        scheduleRecipe.setNote("note");
+        when(scheduleRecipeRepository.findByUser_IdAndRecipe_Id(USER_ID,RECIPE_ID)).thenReturn(scheduleRecipe);
+        ArgumentCaptor<ScheduleRecipeEntity> recipeEntityArgumentCaptor=ArgumentCaptor.forClass(ScheduleRecipeEntity.class);
+        doNothing().when(scheduleRecipeRepository).delete(recipeEntityArgumentCaptor.capture());
+        recipeService.deleteScheduleRecipe(USER_ID,RECIPE_ID);
+        Assert.assertEquals(recipeEntityArgumentCaptor.getValue().getNote(),"note");
+    }
+    @Test
+    public void testUpdateScheduleRecipe(){
+        ScheduleRecipeEntity scheduleRecipe=new ScheduleRecipeEntity();
+        scheduleRecipe.setRecipe(recipe);
+        when(scheduleRecipeRepository.findByUser_IdAndRecipe_Id(USER_ID,RECIPE_ID)).thenReturn(scheduleRecipe);
+        ArgumentCaptor<ScheduleRecipeEntity> recipeEntityArgumentCaptor=ArgumentCaptor.forClass(ScheduleRecipeEntity.class);
+        doReturn(scheduleRecipe).when(scheduleRecipeRepository).save(recipeEntityArgumentCaptor.capture());
+        ScheduleRecipeRequest scheduleRecipeRequest=new ScheduleRecipeRequest();
+        scheduleRecipeRequest.setNote("note");
+        scheduleRecipeRequest.setUserId(USER_ID);
+        scheduleRecipeRequest.setRecipeId(RECIPE_ID);
+        scheduleRecipeRequest.setScheduleTime(new Date());
+        recipeService.updateScheduleRecipe(scheduleRecipeRequest);
+        Assert.assertEquals("note",recipeEntityArgumentCaptor.getValue().getNote());
     }
 }
