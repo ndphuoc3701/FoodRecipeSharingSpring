@@ -59,6 +59,7 @@ public class RecipeServiceTest {
     @Before
     public void initData(){
         user = new UserEntity();
+        user.setId(USER_ID);
         recipe = new RecipeEntity();
         recipe.setName(NAME_RECIPE);
         recipe.setImageData(IMAGE_RECIPE.getBytes(StandardCharsets.UTF_8));
@@ -303,6 +304,7 @@ public class RecipeServiceTest {
     public void testUpdateScheduleRecipe(){
         ScheduleRecipeEntity scheduleRecipe=new ScheduleRecipeEntity();
         scheduleRecipe.setRecipe(recipe);
+        scheduleRecipe.setUser(user);
         when(scheduleRecipeRepository.findByUser_IdAndRecipe_Id(USER_ID,RECIPE_ID)).thenReturn(scheduleRecipe);
         ArgumentCaptor<ScheduleRecipeEntity> recipeEntityArgumentCaptor=ArgumentCaptor.forClass(ScheduleRecipeEntity.class);
         doReturn(scheduleRecipe).when(scheduleRecipeRepository).save(recipeEntityArgumentCaptor.capture());
@@ -313,5 +315,16 @@ public class RecipeServiceTest {
         scheduleRecipeRequest.setScheduleTime(new Date());
         recipeService.updateScheduleRecipe(scheduleRecipeRequest);
         Assert.assertEquals("note",recipeEntityArgumentCaptor.getValue().getNote());
+    }
+
+    @Test
+    public void testUpdateLearntRecipesByUserId() {
+        LearntRecipeEntity learntRecipe=new LearntRecipeEntity();
+        learntRecipe.setEvaluation(new EvaluationEntity());
+        when(learntRecipeRepository.findByUser_IdAndRecipe_Id(USER_ID,RECIPE_ID)).thenReturn(learntRecipe);
+        ArgumentCaptor<LearntRecipeEntity> recipeEntityArgumentCaptor=ArgumentCaptor.forClass(LearntRecipeEntity.class);
+        doReturn(learntRecipe).when(learntRecipeRepository).save(recipeEntityArgumentCaptor.capture());
+        recipeService.updateLearntRecipesByUserId(USER_ID, RECIPE_ID, "note");
+        Assert.assertEquals(recipeEntityArgumentCaptor.getValue().getEvaluation().getNote(),"note");
     }
 }

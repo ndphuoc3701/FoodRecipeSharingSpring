@@ -1,5 +1,6 @@
 package com.hcmut.dacn.controller;
 
+import com.hcmut.dacn.dto.ImageDto;
 import com.hcmut.dacn.dto.Pagination;
 import com.hcmut.dacn.request.EvaluationRequest;
 import com.hcmut.dacn.service.EvaluationService;

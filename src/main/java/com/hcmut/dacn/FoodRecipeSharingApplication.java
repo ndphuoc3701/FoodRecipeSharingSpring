@@ -9,8 +9,8 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-//@EnableElasticsearchRepositories("com.hcmut.dacn.esRepo")
-//@EnableJpaRepositories("com.hcmut.dacn.repository")
+@EnableElasticsearchRepositories("com.hcmut.dacn.esRepo")
+@EnableJpaRepositories("com.hcmut.dacn.repository")
 public class FoodRecipeSharingApplication {
 
 	public static void main(String[] args) {

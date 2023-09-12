@@ -3,6 +3,7 @@ package com.hcmut.dacn;
 import com.hcmut.dacn.dto.EvaluationDto;
 import com.hcmut.dacn.dto.ImageDto;
 import com.hcmut.dacn.dto.Pagination;
+import com.hcmut.dacn.dto.RecipeDto;
 import com.hcmut.dacn.entity.EvaluationEntity;
 import com.hcmut.dacn.entity.RecipeEntity;
 import com.hcmut.dacn.entity.UserEntity;
@@ -62,6 +63,7 @@ public class EvaluationServiceTest {
     public static void initData(){
         user = new UserEntity();
         recipe = new RecipeEntity();
+        recipe.setId(RECIPE_ID);
         recipe.setName(NAME_RECIPE);
         recipe.setImageData(IMAGE_RECIPE.getBytes(StandardCharsets.UTF_8));
         recipe.setOwner(user);
@@ -118,7 +120,7 @@ public class EvaluationServiceTest {
         recipeExpect.setNumStar(5.0);
         recipeExpect.setNumLike(1);
         doReturn(new EvaluationEntity()).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
-
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         evaluationService.create(evaluationRequest);
         Assert.assertEquals(evaluationArgumentCaptor.getValue().getNumStar(),evaluationRequest.getNumStar());
         UserEntity evaluateUserActual=evaluationArgumentCaptor.getValue().getUser();
@@ -157,7 +159,7 @@ public class EvaluationServiceTest {
         recipeExpect.setNumStar(3.0);
         recipeExpect.setNumLike(2);
         doReturn(new EvaluationEntity()).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
-
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         evaluationService.create(evaluationRequest);
         Assert.assertEquals(evaluationArgumentCaptor.getValue().getNumStar(),evaluationRequest.getNumStar());
         UserEntity evaluateUserActual=evaluationArgumentCaptor.getValue().getUser();
@@ -203,6 +205,7 @@ public class EvaluationServiceTest {
         evaluationExpectUser.setNumLike(6);
         evaluationExpectUser.setEvaluationLevel(0.06);
         doReturn(evaluationExpect).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         evaluationService.likeOrDislikeEvaluation(EVALUATION_ID,true);
         EvaluationEntity evaluationActual = evaluationArgumentCaptor.getValue();
         Assert.assertEquals(evaluationActual.getUser().getNumLike(),evaluationExpect.getUser().getNumLike());
@@ -245,6 +248,7 @@ public class EvaluationServiceTest {
         evaluationExpectUser.setNumLike(5);
         evaluationExpectUser.setEvaluationLevel(0.05);
         doReturn(evaluationExpect).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         evaluationService.likeOrDislikeEvaluation(EVALUATION_ID,true);
         EvaluationEntity evaluationActual = evaluationArgumentCaptor.getValue();
         Assert.assertEquals(evaluationActual.getUser().getNumLike(),evaluationExpect.getUser().getNumLike());
@@ -287,6 +291,7 @@ public class EvaluationServiceTest {
         evaluationExpect.setUser(evaluationExpectUser);
         evaluationExpectUser.setNumLike(5);
         evaluationExpectUser.setEvaluationLevel(0.05);
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         doReturn(evaluationExpect).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
         evaluationService.likeOrDislikeEvaluation(EVALUATION_ID,false);
         EvaluationEntity evaluationActual = evaluationArgumentCaptor.getValue();
@@ -330,6 +335,7 @@ public class EvaluationServiceTest {
         evaluationExpectUser.setNumLike(0);
         evaluationExpectUser.setEvaluationLevel(0.0);
         doReturn(evaluationExpect).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         evaluationService.likeOrDislikeEvaluation(EVALUATION_ID,false);
         EvaluationEntity evaluationActual = evaluationArgumentCaptor.getValue();
         Assert.assertEquals(evaluationActual.getUser().getNumLike(),evaluationExpect.getUser().getNumLike());
@@ -372,6 +378,7 @@ public class EvaluationServiceTest {
         evaluationExpectUser.setNumLike(0);
         evaluationExpectUser.setEvaluationLevel(0.0);
         doReturn(evaluationExpect).when(evaluationRepository).save(evaluationArgumentCaptor.capture());
+        when(recipeESRepository.findById(RECIPE_ID)).thenReturn(Optional.of(new RecipeDto()));
         evaluationService.likeOrDislikeEvaluation(EVALUATION_ID,false);
         EvaluationEntity evaluationActual = evaluationArgumentCaptor.getValue();
         Assert.assertEquals(evaluationActual.getUser().getNumLike(),evaluationExpect.getUser().getNumLike());

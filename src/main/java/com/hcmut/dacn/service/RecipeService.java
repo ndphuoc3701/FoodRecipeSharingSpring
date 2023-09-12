@@ -52,9 +52,10 @@ public class RecipeService {
     private LearntRecipeMapper learntRecipeMapper;
     @Autowired
     private ScheduleRecipeMapper scheduleRecipeMapper;
-
     @Autowired
     private RecipeESRepository recipeESRepository;
+    @Autowired
+    SimpMessagingTemplate simpMessagingTemplate;
     RestClient restClient = RestClient
             .builder(HttpHost.create("http://localhost:9200"))
             .build();
@@ -62,45 +63,39 @@ public class RecipeService {
     ElasticsearchClient client = new ElasticsearchClient(transport);
 
     public Pagination<RecipeDto> getAll(Long userId, String keyword, String filter, String ingredient, int page) {
-//        Page<RecipeDto> recipeDtoPage;
-//        List<Query> queries = null;
-//        if (!keyword.isEmpty()) {
-//            String[] keywordSplit = keyword.split(" ");
-//            queries = Arrays.stream(keywordSplit).map(element -> {
-//                String unsignedElement = unsignedString(element);
-//                String ingredientsField = unsignedElement.equalsIgnoreCase(element) ? "unsignedIngredients" : "ingredients";
-//                return MatchQuery.of(m -> m.field(ingredientsField).query(element))._toQuery();
-//            }).collect(Collectors.toList());
-//        }
-//        if (!ingredient.isEmpty()) {
-//            String[] ingredientSplit = ingredient.split(" ");
-//            List<Query> ingredientQuery = Arrays.stream(ingredientSplit).map(element -> MatchQuery.of(m -> m.field("ingredients")
-//                    .query(element))._toQuery()).collect(Collectors.toList());
-//            if (queries == null) {
-//                queries = ingredientQuery;
-//            } else queries.addAll(ingredientQuery);
-//        }
-//
-//        SearchResponse<RecipeDto> searchResponse = null;
-//        try {
-//            List<Query> finalQueries = queries;
-//            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index("recipe")
-//                    .query(q -> q.bool(b -> b
-//                            .must(finalQueries)));
-//            if (!filter.isEmpty())
-//                searchRequestBuilder.sort(so -> so.field(f -> f.field(filter).order(SortOrder.Desc)));
+        List<Query> queries = new ArrayList<>();
+        if (!keyword.isEmpty()) {
+            String[] keywordSplit = keyword.split(" ");
+            queries.addAll(Arrays.stream(keywordSplit).map(element -> {
+                String unsignedElement = unsignedString(element);
+                String ingredientsField = unsignedElement.equalsIgnoreCase(element) ? "unsignedIngredients" : "ingredients";
+                return MatchQuery.of(m -> m.field(ingredientsField).query(element))._toQuery();
+            }).collect(Collectors.toList()));
+        }
+        if (!ingredient.isEmpty()) {
+            String[] ingredientSplit = ingredient.split(" ");
+            List<Query> ingredientQuery = Arrays.stream(ingredientSplit).filter(e->!e.isEmpty()).map(element -> MatchQuery.of(m -> m.field("ingredients")
+                    .query(element))._toQuery()).collect(Collectors.toList());
+            queries.addAll(ingredientQuery);
+        }
+
+        SearchResponse<RecipeDto> searchResponse = null;
+        try {
+            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index("recipe");
+            if (!queries.isEmpty())searchRequestBuilder.query(q -> q.bool(b -> b
+                    .must(queries)));
+
+            if (!filter.isEmpty())
+                searchRequestBuilder.sort(so -> so.field(f -> f.field(filter).order(SortOrder.Desc)));
 //            if (page != 1)
-//                searchRequestBuilder.from((page - 1) * 12).size(12);
-//            searchResponse = client.search(searchRequestBuilder.build(), RecipeDto.class);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        List<Hit<RecipeDto>> hits = searchResponse.hits().hits();
-//        List<RecipeDto> recipeDtos = hits.stream().map(Hit::source).collect(Collectors.toList());
-        List<RecipeDto> recipeDtos = recipeMapper.toDtos(recipeRepository.findAll());
-//        List<Long> recipeIds = recipeDtos.stream().map(RecipeDto::getId).collect(Collectors.toList());
-//        List<Long> favoriteRecipeIds = favoriteRecipeRepository.findRecipesByUser_Id(userId, recipeIds);
+            searchRequestBuilder.from((page - 1) * 12).size(12);
+            searchResponse = client.search(searchRequestBuilder.build(), RecipeDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<Hit<RecipeDto>> hits = searchResponse.hits().hits();
+        List<RecipeDto> recipeDtos = hits.stream().map(Hit::source).collect(Collectors.toList());
         List<Long> favoriteRecipeIds = favoriteRecipeRepository.findRecipesByUser_Id(userId);
 
         recipeDtos.forEach(r -> {
@@ -109,24 +104,25 @@ public class RecipeService {
             }
         });
         Pagination<RecipeDto> recipeDtoPagination = new Pagination<>();
-//        recipeDtoPagination.setTotalPages((int) searchResponse.hits().total().value() / 12 + 1);
+        recipeDtoPagination.setTotalPages((int)Math.ceil(searchResponse.hits().total().value()/12.0));
         recipeDtoPagination.setObjects(recipeDtos);
         return recipeDtoPagination;
     }
 
     public List<String> getRecipeByInput(String keyword) {
-        List<Query> queries = null;
+        List<Query> queries = new ArrayList<>();
+
         if (!keyword.isEmpty()) {
             String[] keywordSplit = keyword.split(" ");
             String lastWord = keywordSplit[keywordSplit.length - 1];
             String[] keywordSplitExceptLastWord = Arrays.copyOf(keywordSplit, keywordSplit.length - 1);
-            queries = Arrays.stream(keywordSplitExceptLastWord).map(element -> {
+            queries.addAll(Arrays.stream(keywordSplitExceptLastWord).map(element -> {
                 String unsignedElement = unsignedString(element);
-                String ingredientsField = unsignedElement.equalsIgnoreCase(element) ? "unsignedIngredients" : "ingredients";
+                String ingredientsField = unsignedElement.equalsIgnoreCase(element) ? "unsignedName" : "name";
                 return MatchQuery.of(m -> m.field(ingredientsField).query(element))._toQuery();
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toList()));
             String unsignedLastWord = unsignedString(lastWord);
-            String ingredientsField = unsignedLastWord.equalsIgnoreCase(lastWord) ? "unsignedIngredients" : "ingredients";
+            String ingredientsField = unsignedLastWord.equalsIgnoreCase(lastWord) ? "unsignedName" : "name";
             String wordQuery = unsignedLastWord.equalsIgnoreCase(lastWord) ? unsignedLastWord : lastWord;
             Query lastWordQuery = MatchQuery.of(m -> m.field(ingredientsField).fuzziness("2").prefixLength(unsignedLastWord.length()).query(wordQuery))._toQuery();
             queries.add(lastWordQuery);
@@ -144,8 +140,7 @@ public class RecipeService {
         }
 
         List<Hit<RecipeDto>> hits = searchResponse.hits().hits();
-        List<String> recipeDtos = hits.stream().map(h -> h.source().getName()).collect(Collectors.toList());
-        return recipeDtos;
+        return hits.stream().map(h -> h.source().getName()).collect(Collectors.toList());
     }
 
     public Pagination<RecipeDto> getRecipesByUserId(Long userId, int page) {
@@ -204,8 +199,7 @@ public class RecipeService {
         recipeDto.setIngredients(esIngredients);
         recipeDto.setUnsignedIngredients(unsignedString(esIngredients));
         recipeDto.setUnsignedName(unsignedString(recipe.getName()));
-//        return recipeESRepository.save(recipeDto);
-        return recipeDto;
+        return recipeESRepository.save(recipeDto);
     }
 
     private String toEsIngredients(String recipeName, List<IngredientRecipeEntity> ingredientRecipeEntities) {
@@ -215,17 +209,11 @@ public class RecipeService {
     public void addFavoriteRecipe(Long userId, Long recipeId) {
         UserEntity user = userRepository.findById(userId).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(recipeId).orElse(null);
-//        RecipeDto recipeDto = recipeESRepository.findById(recipeId).orElse(null);
         FavoriteRecipeEntity favoriteRecipe = new FavoriteRecipeEntity();
-        RecipeDto recipeDto = new RecipeDto();
         favoriteRecipe.setRecipe(recipe);
         favoriteRecipe.setUser(user);
+        favoriteRecipe.getRecipe().setNumFavorite(recipe.getNumFavorite() + 1);
         favoriteRecipeRepository.save(favoriteRecipe);
-        Integer newNumFavorite = recipe.getNumFavorite() + 1;
-        recipe.setNumFavorite(newNumFavorite);
-        recipeRepository.save(recipe);
-        recipeDto.setNumFavorite(newNumFavorite);
-//        recipeESRepository.save(recipeDto);
     }
 
     public void deleteFavoriteRecipe(Long userId, Long recipeId) {
@@ -275,6 +263,11 @@ public class RecipeService {
         recipeDtoPagination.setTotalPages(learntRecipePage.getTotalPages());
         recipeDtoPagination.setObjects(learntRecipeDtos);
         return recipeDtoPagination;
+    }
+    public void updateLearntRecipesByUserId(Long userId, Long recipeId, String note) {
+        LearntRecipeEntity learntRecipe=learntRecipeRepository.findByUser_IdAndRecipe_Id(userId,recipeId);
+        learntRecipe.getEvaluation().setNote(note);
+        learntRecipeRepository.save(learntRecipe);
     }
 
     public RecipeDetailDto getRecipeDetailById(Long recipeId,Long userId) {
@@ -343,12 +336,5 @@ public class RecipeService {
 //        return recipeRequests.stream().map(this::create).collect(Collectors.toList());
 //    }
 
-    @Autowired
-    SimpMessagingTemplate simpMessagingTemplate;
 
-//    public void sendNotification(Schedule schedule) {
-////        String address = "/queue/"+schedule.getUserId()+"/notification";
-////        simpMessagingTemplate.convertAndSend(address, schedule.getContent());
-//        new Timer().schedule(new ScheduleTest(schedule.getContent(), schedule.getUserId(), simpMessagingTemplate), schedule.getScheduleTime());
-//    }
 }

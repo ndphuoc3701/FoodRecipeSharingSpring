@@ -65,6 +65,10 @@ public class RecipeController {
     public Pagination<LearntRecipeDto> getLearntRecipesByUserId(@RequestParam Long userId, @RequestParam int page){
         return recipeService.getLearntRecipesByUserId(userId,page);
     }
+    @PutMapping("learning")
+    public void updateLearntRecipesByUserId(@RequestParam Long userId, @RequestParam Long recipeId, @RequestParam String note){
+        recipeService.updateLearntRecipesByUserId(userId,recipeId,note);
+    }
     @GetMapping("scheduling")
     public Pagination<ScheduleRecipeDto> getScheduledRecipesByUserId(@RequestParam boolean old, @RequestParam Long userId, @RequestParam int page){
         return recipeService.getScheduledRecipesByUserId(old, userId,page);

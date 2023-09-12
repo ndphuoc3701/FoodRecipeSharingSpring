@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-//@Document(indexName = "recipe")
+@Document(indexName = "recipe")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RecipeDto {
     private Long id;

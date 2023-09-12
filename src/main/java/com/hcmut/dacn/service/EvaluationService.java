@@ -51,14 +51,9 @@ public class EvaluationService {
     public EvaluationDto create(EvaluationRequest evaluationRequest) {
         UserEntity user = userRepository.findById(evaluationRequest.getUserId()).orElse(null);
         RecipeEntity recipe = recipeRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
-//        RecipeDto recipeDto = recipeESRepository.findById(evaluationRequest.getRecipeId()).orElse(null);
         Integer oldNumEvaluation = recipe.getNumEvaluation();
-        RecipeDto recipeDto = new RecipeDto();
         recipe.setNumEvaluation(oldNumEvaluation + 1);
-        recipeDto.setNumEvaluation(oldNumEvaluation + 1);
         updateNumStarRecipe(recipe, evaluationRequest.getNumStar());
-        recipeDto.setNumStar(recipe.getNumStar());
-//        recipeESRepository.save(recipeDto);
         EvaluationEntity evaluation = new EvaluationEntity();
         evaluation.setContent(evaluationRequest.getContent());
         evaluation.setNumStar(evaluationRequest.getNumStar());
@@ -119,6 +114,10 @@ public class EvaluationService {
         recipe.setNumLike(totalLikeRecipe);
         int numberRecipeOfOwner = recipeRepository.numberRecipeOfUserId(recipe.getOwner().getId());
         recipe.getOwner().setCookLevel(((recipe.getOwner().getCookLevel() * numberRecipeOfOwner) + (recipe.getNumStar()-oldNumStarRecipe)) / numberRecipeOfOwner);
+        RecipeDto recipeDto = recipeESRepository.findById(recipe.getId()).orElse(null);
+        recipeDto.setNumStar(recipe.getNumStar());
+        recipeDto.setNumEvaluation(recipe.getNumEvaluation());
+        recipeESRepository.save(recipeDto);
     }
 
     private void updateEvaluationLevelOfUser(UserEntity user, int numLike) {

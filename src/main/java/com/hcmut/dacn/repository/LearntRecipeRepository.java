@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LearntRecipeRepository extends JpaRepository<LearntRecipeEntity,Long> {
     Page<LearntRecipeEntity> findLearntRecipesByUser_IdOrderByEvaluation_CreatedDateDesc(Long userId, Pageable pageable);
-
+    LearntRecipeEntity findByUser_IdAndRecipe_Id(Long userId,Long recipeId);
 }
